@@ -138,17 +138,18 @@ export function FleetSection() {
           </button>
 
           {/* Sliding Track */}
-          <div className="overflow-hidden mx-8 md:mx-14">
+          <div className="overflow-hidden mx-2 md:mx-14">
+            {/* Mobile: 1 vehicle at a time */}
             <motion.div
-              className="flex"
-              animate={{ x: `${-slideOffset * (100 / vehicles.length)}%` }}
+              className="flex md:hidden"
+              animate={{ x: `${-currentIndex * (100 / vehicles.length)}%` }}
               transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
-              style={{ width: `${(vehicles.length * 100) / 3}%` }}
+              style={{ width: `${vehicles.length * 100}%` }}
             >
               {vehicles.map((vehicle, i) => (
                 <div
                   key={vehicle.id}
-                  className="px-3 md:px-6"
+                  className="px-4"
                   style={{ width: `${100 / vehicles.length}%` }}
                 >
                   <div
@@ -161,7 +162,38 @@ export function FleetSection() {
                     <img
                       src={vehicle.image}
                       alt={vehicle.name}
-                      className="w-full h-52 md:h-64 lg:h-72 object-contain cursor-pointer"
+                      className="w-full h-64 md:h-64 lg:h-72 object-contain cursor-pointer"
+                      onClick={() => setCurrentIndex(i)}
+                    />
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+
+            {/* Desktop: 3 vehicles at a time */}
+            <motion.div
+              className="hidden md:flex"
+              animate={{ x: `${-slideOffset * (100 / vehicles.length)}%` }}
+              transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+              style={{ width: `${(vehicles.length * 100) / 3}%` }}
+            >
+              {vehicles.map((vehicle, i) => (
+                <div
+                  key={vehicle.id}
+                  className="px-6"
+                  style={{ width: `${100 / vehicles.length}%` }}
+                >
+                  <div
+                    className={`transition-all duration-500 ${
+                      i === currentIndex
+                        ? 'opacity-100 scale-100'
+                        : 'opacity-50 scale-[0.92]'
+                    }`}
+                  >
+                    <img
+                      src={vehicle.image}
+                      alt={vehicle.name}
+                      className="w-full h-64 lg:h-72 object-contain cursor-pointer"
                       onClick={() => setCurrentIndex(i)}
                     />
                   </div>
