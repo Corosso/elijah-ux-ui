@@ -1,72 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { UsersIcon, BriefcaseIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
-
-const vehicles = [
-  {
-    id: 1,
-    name: 'Mercedes-Benz S-Class',
-    category: 'First Class',
-    description: 'Mercedes S550 or similar',
-    passengers: 3,
-    luggage: 3,
-    image: '/flota/mercedes-s-class.png',
-  },
-  {
-    id: 2,
-    name: 'Cadillac XTS',
-    category: 'Business Sedan',
-    description: 'Cadillac XTS or similar',
-    passengers: 3,
-    luggage: 3,
-    image: '/flota/cadillac-xts.png',
-  },
-  {
-    id: 3,
-    name: 'Cadillac Escalade',
-    category: 'SUV',
-    description: 'Cadillac Escalade or similar',
-    passengers: 6,
-    luggage: 6,
-    image: '/flota/cadillac-escalade.png',
-  },
-  {
-    id: 4,
-    name: 'Chevrolet Suburban',
-    category: 'SUV',
-    description: 'Chevrolet Suburban or similar',
-    passengers: 6,
-    luggage: 6,
-    image: '/flota/chevy-suv.png',
-  },
-  {
-    id: 5,
-    name: 'Tesla Model X',
-    category: 'Electric Class',
-    description: 'Tesla Model X or similar',
-    passengers: 4,
-    luggage: 3,
-    image: '/flota/tesla-model-x.png',
-  },
-  {
-    id: 6,
-    name: 'Mercedes-Benz Sprinter',
-    category: 'Executive Van',
-    description: 'Mercedes Sprinter or similar',
-    passengers: 12,
-    luggage: 12,
-    image: '/flota/mercedes-sprinter.png',
-  },
-  {
-    id: 7,
-    name: 'Lincoln Stretch Limousine',
-    category: 'Limousine',
-    description: 'Lincoln Stretch Limo or similar',
-    passengers: 8,
-    luggage: 4,
-    image: '/flota/lincoln-stretch-limousine.png',
-  },
-];
+import { vehicles } from '../data';
 
 export function FleetSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -79,7 +14,6 @@ export function FleetSection() {
   };
 
   const currentVehicle = vehicles[currentIndex];
-  // Clamp so active vehicle stays centered (except at edges)
   const slideOffset = Math.max(0, Math.min(currentIndex - 1, vehicles.length - 3));
 
   return (
@@ -121,23 +55,21 @@ export function FleetSection() {
 
         {/* Carousel */}
         <div className="relative">
-          {/* Navigation Arrows */}
           <button
             onClick={prev}
-            className="absolute left-0 md:-left-2 top-[45%] -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/80 dark:bg-bg-surface-elevated/80 backdrop-blur-sm border border-border shadow-lg flex items-center justify-center text-text-secondary hover:text-gold hover:border-gold/50 transition-all group"
+            className="absolute left-0 md:-left-2 top-[45%] -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/80 dark:bg-bg-elevated/80 backdrop-blur-sm border border-border shadow-lg flex items-center justify-center text-text-secondary hover:text-gold hover:border-gold/50 transition-all group"
             aria-label="Previous vehicle"
           >
             <ChevronLeftIcon className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
           </button>
           <button
             onClick={next}
-            className="absolute right-0 md:-right-2 top-[45%] -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/80 dark:bg-bg-surface-elevated/80 backdrop-blur-sm border border-border shadow-lg flex items-center justify-center text-text-secondary hover:text-gold hover:border-gold/50 transition-all group"
+            className="absolute right-0 md:-right-2 top-[45%] -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/80 dark:bg-bg-elevated/80 backdrop-blur-sm border border-border shadow-lg flex items-center justify-center text-text-secondary hover:text-gold hover:border-gold/50 transition-all group"
             aria-label="Next vehicle"
           >
             <ChevronRightIcon className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
           </button>
 
-          {/* Sliding Track */}
           <div className="overflow-hidden mx-2 md:mx-14">
             {/* Mobile: 1 vehicle at a time */}
             <motion.div
@@ -162,7 +94,7 @@ export function FleetSection() {
                     <img
                       src={vehicle.image}
                       alt={vehicle.name}
-                      className="w-full h-64 md:h-64 lg:h-72 object-contain cursor-pointer"
+                      className="w-full h-64 md:h-64 lg:h-72 object-contain cursor-pointer dark:drop-shadow-[0_0_25px_rgba(212,175,55,0.3)] dark:brightness-110"
                       onClick={() => setCurrentIndex(i)}
                     />
                   </div>
@@ -193,7 +125,7 @@ export function FleetSection() {
                     <img
                       src={vehicle.image}
                       alt={vehicle.name}
-                      className="w-full h-64 lg:h-72 object-contain cursor-pointer"
+                      className="w-full h-64 lg:h-72 object-contain cursor-pointer dark:drop-shadow-[0_0_25px_rgba(212,175,55,0.3)] dark:brightness-110"
                       onClick={() => setCurrentIndex(i)}
                     />
                   </div>
@@ -202,7 +134,7 @@ export function FleetSection() {
             </motion.div>
           </div>
 
-          {/* Vehicle Info (below carousel) */}
+          {/* Vehicle Info */}
           <div className="text-center mt-6">
             <h3 className="text-xl md:text-2xl font-serif text-text-primary mb-1">
               {currentVehicle.category}

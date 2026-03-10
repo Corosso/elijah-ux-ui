@@ -1,29 +1,14 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { MapPinIcon, ClockIcon, PlaneIcon, SparklesIcon } from 'lucide-react';
+import { services } from '../data';
+import type { LucideIcon } from 'lucide-react';
 
-const services = [
-  {
-    icon: MapPinIcon,
-    title: 'Point to Point',
-    desc: 'Direct transfers with maximum punctuality and comfort for your meetings and commitments.',
-  },
-  {
-    icon: ClockIcon,
-    title: 'By the Hour',
-    desc: 'A chauffeur at your complete disposal for as long as you need, with total flexibility.',
-  },
-  {
-    icon: PlaneIcon,
-    title: 'Airport Transfers',
-    desc: 'Reception and transfer service with flight monitoring to guarantee your on-time arrival.',
-  },
-  {
-    icon: SparklesIcon,
-    title: 'Special Events',
-    desc: 'Luxury vehicles for weddings, corporate galas and occasions that demand the highest elegance.',
-  },
-];
+const iconMap: Record<string, LucideIcon> = {
+  MapPin: MapPinIcon,
+  Clock: ClockIcon,
+  Plane: PlaneIcon,
+  Sparkles: SparklesIcon,
+};
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -72,7 +57,7 @@ export function ServicesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="text-[#9A9590] max-w-2xl mx-auto text-lg mt-6"
+            className="text-text-secondary max-w-2xl mx-auto text-lg mt-6"
           >
             Elijah is the stress-free solution for your ground transportation
             needs. Enjoy the comfort of a private journey.
@@ -86,31 +71,34 @@ export function ServicesSection() {
           viewport={{ once: true, margin: '-100px' }}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
         >
-          {services.map((service, index) => (
-            <motion.div
-              key={index}
-              variants={itemVariants}
-              className={`group py-8 px-6 lg:px-8 relative ${
-                index < services.length - 1
-                  ? 'lg:border-r lg:border-[#2A2520]'
-                  : ''
-              } ${
-                index < 2
-                  ? 'md:border-b lg:border-b-0 md:border-[#2A2520]'
-                  : ''
-              }`}
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center text-gold group-hover:bg-gold/20 transition-colors duration-300 flex-shrink-0">
-                  <service.icon className="w-5 h-5" />
+          {services.map((service, index) => {
+            const Icon = iconMap[service.icon] || MapPinIcon;
+            return (
+              <motion.div
+                key={index}
+                variants={itemVariants}
+                className={`group py-8 px-6 lg:px-8 relative ${
+                  index < services.length - 1
+                    ? 'lg:border-r lg:border-[#2A2520]'
+                    : ''
+                } ${
+                  index < 2
+                    ? 'md:border-b lg:border-b-0 md:border-[#2A2520]'
+                    : ''
+                }`}
+              >
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center text-gold group-hover:bg-gold/20 transition-colors duration-300 flex-shrink-0">
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-lg font-serif text-white">{service.title}</h3>
                 </div>
-                <h3 className="text-lg font-serif text-white">{service.title}</h3>
-              </div>
-              <p className="text-[#9A9590] text-sm leading-relaxed">
-                {service.desc}
-              </p>
-            </motion.div>
-          ))}
+                <p className="text-text-secondary text-sm leading-relaxed">
+                  {service.desc}
+                </p>
+              </motion.div>
+            );
+          })}
         </motion.div>
       </div>
     </section>

@@ -95,3 +95,65 @@ h6 {
   background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
   animation: shimmer 2s infinite;
 }
+
+
+
+/* Leaflet cursor fix - dark hand cursor for light mode */
+.leaflet-container,
+.leaflet-grab,
+.leaflet-container a {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0'/%3E%3Cpath d='M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2'/%3E%3Cpath d='M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8'/%3E%3Cpath d='M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8H12c-2.8 0-4.5-1.2-5.7-2.5'/%3E%3Cpath d='M2 15h3.5'/%3E%3Cpath d='M2 18h6'/%3E%3C/svg%3E") 10 10, grab !important;
+}
+
+.leaflet-dragging .leaflet-grab,
+.leaflet-dragging .leaflet-container,
+.leaflet-container:active {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0'/%3E%3Cpath d='M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2'/%3E%3Cpath d='M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8'/%3E%3Cpath d='M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8H12c-2.8 0-4.5-1.2-5.7-2.5'/%3E%3C/svg%3E") 10 10, grabbing !important;
+}
+
+.dark .leaflet-container,
+.dark .leaflet-grab {
+  cursor: grab !important;
+}
+
+.dark .leaflet-dragging .leaflet-grab,
+.dark .leaflet-container:active {
+  cursor: grabbing !important;
+}
+
+/* Leaflet zoom controls styling */
+.leaflet-control-zoom {
+  border: 1px solid var(--border) !important;
+  border-radius: 6px !important;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+}
+
+.leaflet-control-zoom a {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border) !important;
+  width: 32px !important;
+  height: 32px !important;
+  line-height: 32px !important;
+  font-size: 16px !important;
+}
+
+.leaflet-control-zoom a:last-child {
+  border-bottom: none !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: var(--accent-gold-light) !important;
+  color: var(--accent-gold) !important;
+}
+
+/* Push zoom control below navbar */
+.leaflet-top.leaflet-left {
+  top: 70px !important;
+}
+
+/* Elijah text glow */
+.text-glow-gold {
+  text-shadow: 0 0 12px rgba(212, 175, 55, 0.7), 0 0 4px rgba(212, 175, 55, 0.4);
+}

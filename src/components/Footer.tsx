@@ -1,11 +1,17 @@
-import React from 'react';
-import {
-  InstagramIcon,
-  TwitterIcon,
-  LinkedinIcon,
-  FacebookIcon } from
-'lucide-react';
+import { useState } from 'react';
+import { InstagramIcon, TwitterIcon, LinkedinIcon, FacebookIcon } from 'lucide-react';
+import { contactInfo } from '../data';
+import { LegalModal } from './LegalModal';
+
+const socialIcons = {
+  instagram: InstagramIcon,
+  twitter: TwitterIcon,
+  linkedin: LinkedinIcon,
+  facebook: FacebookIcon,
+};
+
 export function Footer() {
+  const [legalModal, setLegalModal] = useState<"terms" | "privacy" | "cookies" | null>(null);
   return (
     <footer className="bg-[#0A0A0A] pt-20 pb-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -13,11 +19,7 @@ export function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-6">
-              <img
-                src="/logo.png"
-                alt="Elijah Logo"
-                className="h-12 w-auto object-contain" />
-
+              <img src="/logo.png" alt="Elijah Logo" className="h-12 w-auto object-contain" />
               <span className="font-serif text-2xl tracking-[0.2em] text-[#F5F0E8] uppercase">
                 Elijah
               </span>
@@ -27,181 +29,69 @@ export function Footer() {
               Redefining luxury, privacy and comfort on every journey.
             </p>
             <div className="flex gap-4">
-              <a
-                href="#"
-                className="w-10 h-10 rounded-full border border-[#2A2520] flex items-center justify-center text-[#9A9590] hover:text-gold hover:border-gold transition-colors">
-
-                <InstagramIcon className="w-4 h-4" />
-              </a>
-              <a
-                href="#"
-                className="w-10 h-10 rounded-full border border-[#2A2520] flex items-center justify-center text-[#9A9590] hover:text-gold hover:border-gold transition-colors">
-
-                <TwitterIcon className="w-4 h-4" />
-              </a>
-              <a
-                href="#"
-                className="w-10 h-10 rounded-full border border-[#2A2520] flex items-center justify-center text-[#9A9590] hover:text-gold hover:border-gold transition-colors">
-
-                <LinkedinIcon className="w-4 h-4" />
-              </a>
-              <a
-                href="#"
-                className="w-10 h-10 rounded-full border border-[#2A2520] flex items-center justify-center text-[#9A9590] hover:text-gold hover:border-gold transition-colors">
-
-                <FacebookIcon className="w-4 h-4" />
-              </a>
+              {Object.entries(contactInfo.social).map(([key, url]) => {
+                const Icon = socialIcons[key as keyof typeof socialIcons];
+                if (!Icon || !url) return null;
+                return (
+                  <a
+                    key={key}
+                    href={url}
+                    className="w-10 h-10 rounded-full border border-[#2A2520] flex items-center justify-center text-[#9A9590] hover:text-gold hover:border-gold transition-colors"
+                  >
+                    <Icon className="w-4 h-4" />
+                  </a>
+                );
+              })}
             </div>
           </div>
 
           {/* Links Columns */}
           <div>
-            <h4 className="text-[#F5F0E8] font-medium mb-6 uppercase tracking-wider text-sm">
-              Services
-            </h4>
+            <h4 className="text-[#F5F0E8] font-medium mb-6 uppercase tracking-wider text-sm">Services</h4>
             <ul className="space-y-4">
-              <li>
-                <a
-                  href="#"
-                  className="text-[#9A9590] hover:text-gold text-sm transition-colors">
-
-                  Point to Point
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-[#9A9590] hover:text-gold text-sm transition-colors">
-
-                  By the Hour
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-[#9A9590] hover:text-gold text-sm transition-colors">
-
-                  Airport
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-[#9A9590] hover:text-gold text-sm transition-colors">
-
-                  Events
-                </a>
-              </li>
+              {['Point to Point', 'By the Hour', 'Airport', 'Events'].map((item) => (
+                <li key={item}>
+                  <a href="#" className="text-[#9A9590] hover:text-gold text-sm transition-colors">{item}</a>
+                </li>
+              ))}
             </ul>
           </div>
 
           <div>
-            <h4 className="text-[#F5F0E8] font-medium mb-6 uppercase tracking-wider text-sm">
-              Cities
-            </h4>
+            <h4 className="text-[#F5F0E8] font-medium mb-6 uppercase tracking-wider text-sm">Cities</h4>
             <ul className="space-y-4">
-              <li>
-                <a
-                  href="#"
-                  className="text-[#9A9590] hover:text-gold text-sm transition-colors">
-
-                  Bogotá
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-[#9A9590] hover:text-gold text-sm transition-colors">
-
-                  Medellín
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-[#9A9590] hover:text-gold text-sm transition-colors">
-
-                  Cartagena
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-[#9A9590] hover:text-gold text-sm transition-colors">
-
-                  Cali
-                </a>
-              </li>
+              {['Bogotá', 'Medellín', 'Cartagena', 'Cali'].map((city) => (
+                <li key={city}>
+                  <a href="#" className="text-[#9A9590] hover:text-gold text-sm transition-colors">{city}</a>
+                </li>
+              ))}
             </ul>
           </div>
 
           <div>
-            <h4 className="text-[#F5F0E8] font-medium mb-6 uppercase tracking-wider text-sm">
-              Company
-            </h4>
+            <h4 className="text-[#F5F0E8] font-medium mb-6 uppercase tracking-wider text-sm">Company</h4>
             <ul className="space-y-4">
-              <li>
-                <a
-                  href="#"
-                  className="text-[#9A9590] hover:text-gold text-sm transition-colors">
-
-                  About Us
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-[#9A9590] hover:text-gold text-sm transition-colors">
-
-                  Careers
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-[#9A9590] hover:text-gold text-sm transition-colors">
-
-                  Press
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-[#9A9590] hover:text-gold text-sm transition-colors">
-
-                  Contact
-                </a>
-              </li>
+              {['About Us', 'Careers', 'Press', 'Contact'].map((item) => (
+                <li key={item}>
+                  <a href="#" className="text-[#9A9590] hover:text-gold text-sm transition-colors">{item}</a>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
 
         <div className="pt-8 border-t border-[#2A2520] flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-[#9A9590] text-sm">
-            © 2026 Elijah. All rights reserved.
+            &copy; {new Date().getFullYear()} Elijah. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <a
-              href="#"
-              className="text-[#9A9590] hover:text-gold text-sm transition-colors">
-
-              Terms
-            </a>
-            <a
-              href="#"
-              className="text-[#9A9590] hover:text-gold text-sm transition-colors">
-
-              Privacy
-            </a>
-            <a
-              href="#"
-              className="text-[#9A9590] hover:text-gold text-sm transition-colors">
-
-              Cookies
-            </a>
+            <button onClick={() => setLegalModal("terms")} className="text-[#9A9590] hover:text-gold text-sm transition-colors">Terms</button>
+            <button onClick={() => setLegalModal("privacy")} className="text-[#9A9590] hover:text-gold text-sm transition-colors">Privacy</button>
+            <button onClick={() => setLegalModal("cookies")} className="text-[#9A9590] hover:text-gold text-sm transition-colors">Cookies</button>
           </div>
         </div>
       </div>
-    </footer>);
-
+      <LegalModal isOpen={legalModal !== null} onClose={() => setLegalModal(null)} title="" type={legalModal || "terms"} />
+    </footer>
+  );
 }
