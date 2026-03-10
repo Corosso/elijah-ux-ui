@@ -5,6 +5,8 @@ import { geocodeAutocomplete, getDirections } from '../api/openrouteservice';
 import type { GeocodeSuggestion, RouteGeometry } from '../api/openrouteservice';
 import { useDebounce } from '../hooks/useDebounce';
 import { vehicles } from '../data/vehicles';
+import { calculatePrice } from '../utils/pricing';
+import type { PricingBreakdown } from '../utils/pricing';
 
 interface BookingFormProps {
   onRouteFound?: (
@@ -16,18 +18,7 @@ interface BookingFormProps {
 
 const COLOMBIA_CENTER = { lat: 4.65, lng: -74.05 };
 
-const VEHICLE_RATES: Record<number, number> = {
-  1: 3.20,
-  2: 2.80,
-  3: 3.80,
-  4: 3.50,
-  5: 3.60,
-  6: 4.20,
-  7: 5.50,
-};
-
 const INPUT_CLASS = 'w-full bg-black/5 dark:bg-white/5 border border-black/15 dark:border-white/10 rounded py-2.5 pl-3 pr-3 text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all text-sm';
-
 function extractCity(label: string): string {
   const parts = label.split(',');
   return parts[0]?.trim() || label;
@@ -117,19 +108,16 @@ export function BookingForm({ onRouteFound }: BookingFormProps) {
   const todayStr = new Date().toISOString().split('T')[0];
   const canSearch = origin !== null && destination !== null && selectedDate !== '' && selectedTime !== '';
 
-  const calculatePrice = (vehicleId: number): number => {
-    if (!routeResult) return 0;
-    const distanceKm = routeResult.distance / 1000;
-    const baseFare = 5.00;
-    const rate = VEHICLE_RATES[vehicleId] || 3.00;
-    let nightSurcharge = 0;
-    if (selectedTime) {
-      const hour = parseInt(selectedTime.split(':')[0], 10);
-      if (hour >= 22 || hour < 5) nightSurcharge = 10;
-    }
-    let total = baseFare + (distanceKm * rate) + nightSurcharge;
-    if (returnTrip) total *= 2;
-    return total;
+  const getBreakdown = (vehicleId: number): PricingBreakdown | null => {
+    if (!routeResult) return null;
+    return calculatePrice({
+      distanceKm: routeResult.distance / 1000,
+      durationMin: routeResult.duration / 60,
+      vehicleId,
+      date: selectedDate,
+      time: selectedTime,
+      returnTrip,
+    });
   };
 
   const handleGetPrices = () => {
@@ -253,7 +241,8 @@ export function BookingForm({ onRouteFound }: BookingFormProps) {
 
             <div className="max-h-[60vh] overflow-y-auto">
               {vehicles.map((v) => {
-                const price = calculatePrice(v.id);
+                const breakdown = getBreakdown(v.id);
+                const price = breakdown?.total ?? 0;
                 return (
                   <div
                     key={v.id}
@@ -273,6 +262,25 @@ export function BookingForm({ onRouteFound }: BookingFormProps) {
                           <span className="text-[11px]">{v.luggage}</span>
                         </div>
                       </div>
+                      {breakdown && (
+                        <div className="flex flex-wrap gap-1.5 mt-1.5">
+                          {breakdown.timeMultiplierValue !== 1.0 && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-gold/10 text-gold font-medium">
+                              {breakdown.timeMultiplierLabel} {breakdown.timeMultiplierValue > 1 ? `+${Math.round((breakdown.timeMultiplierValue - 1) * 100)}%` : `${Math.round((1 - breakdown.timeMultiplierValue) * 100)}% off`}
+                            </span>
+                          )}
+                          {breakdown.dayMultiplierValue !== 1.0 && (
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ${breakdown.dayMultiplierValue > 1 ? 'bg-orange-500/10 text-orange-400' : 'bg-green-500/10 text-green-400'}`}>
+                              {breakdown.dayMultiplierLabel} {breakdown.dayMultiplierValue > 1 ? `+${Math.round((breakdown.dayMultiplierValue - 1) * 100)}%` : `${Math.round((1 - breakdown.dayMultiplierValue) * 100)}% off`}
+                            </span>
+                          )}
+                          {breakdown.advanceDiscount > 0 && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 font-medium">
+                              Early booking -{Math.round(breakdown.advanceDiscount * 100)}%
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div className="flex flex-col items-end flex-shrink-0">
                       <span className="text-lg font-bold text-gold">${price.toFixed(2)}</span>
