@@ -38,7 +38,7 @@ interface Booking {
   amount: string;
 }
 
-var sidebarItems: { key: SidebarItem; label: string; icon: React.ElementType }[] = [
+const sidebarItems: { key: SidebarItem; label: string; icon: React.ElementType }[] = [
   { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboardIcon },
   { key: 'bookings', label: 'Bookings', icon: CalendarIcon },
   { key: 'fleet', label: 'Fleet', icon: CarIcon },
@@ -47,7 +47,7 @@ var sidebarItems: { key: SidebarItem; label: string; icon: React.ElementType }[]
   { key: 'analytics', label: 'Analytics', icon: BarChart3Icon },
 ];
 
-var mockBookings: Booking[] = [
+const mockBookings: Booking[] = [
   { id: '#ELJ-001', customer: 'Maria Garcia', route: 'Bogota -> Medellin', date: '2026-03-09', status: 'Completed', amount: '$120' },
   { id: '#ELJ-002', customer: 'Carlos Ruiz', route: 'Medellin -> Rionegro', date: '2026-03-09', status: 'In Progress', amount: '$45' },
   { id: '#ELJ-003', customer: 'Ana Torres', route: 'Cartagena -> Barranquilla', date: '2026-03-08', status: 'Completed', amount: '$85' },
@@ -56,7 +56,7 @@ var mockBookings: Booking[] = [
   { id: '#ELJ-006', customer: 'Juan Ramirez', route: 'Bogota -> Airport', date: '2026-03-07', status: 'Cancelled', amount: '$35' },
 ];
 
-var statCards = [
+const statCards = [
   { label: 'Total Bookings', value: '1,247', icon: ClipboardListIcon, color: '#D4AF37' },
   { label: 'Revenue', value: '$45,230 USD', icon: DollarSignIcon, color: '#22C55E' },
   { label: 'Active Drivers', value: '18', icon: TrendingUpIcon, color: '#3B82F6' },
@@ -76,8 +76,8 @@ function DashboardView() {
     <div className="space-y-8">
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map(function (card) {
-          var IconComp = card.icon;
+        {statCards.map((card) => {
+          const IconComp = card.icon;
           return (
             <div
               key={card.label}
@@ -119,7 +119,7 @@ function DashboardView() {
                 </tr>
               </thead>
               <tbody>
-                {mockBookings.map(function (booking) {
+                {mockBookings.map((booking) => {
                   return (
                     <tr key={booking.id} style={{ borderBottom: '1px solid #2A2520' }} className="hover:bg-white/5 transition-colors">
                       <td className="px-4 py-3 text-sm font-mono" style={{ color: '#D4AF37' }}>{booking.id}</td>
@@ -146,7 +146,7 @@ function DashboardView() {
 
 /* --- BookingsView --- */
 
-var fullBookings = [
+const fullBookings = [
   { id: '#ELJ-001', customer: 'Maria Garcia', phone: '+57 310 234 5678', route: 'Bogota -> Medellin', vehicle: 'Mercedes S-Class', driver: 'Andres Lopez', date: '2026-03-09', time: '08:30', status: 'Completed' as const, amount: '$120' },
   { id: '#ELJ-002', customer: 'Carlos Ruiz', phone: '+57 315 876 5432', route: 'Medellin -> Rionegro', vehicle: 'Cadillac XTS', driver: 'Felipe Moreno', date: '2026-03-09', time: '10:15', status: 'In Progress' as const, amount: '$45' },
   { id: '#ELJ-003', customer: 'Ana Torres', phone: '+57 320 111 2233', route: 'Cartagena -> Barranquilla', vehicle: 'Cadillac Escalade', driver: 'Ricardo Soto', date: '2026-03-08', time: '14:00', status: 'Completed' as const, amount: '$85' },
@@ -162,12 +162,12 @@ var fullBookings = [
 ];
 
 function BookingsView() {
-  var [statusFilter, setStatusFilter] = useState('All');
-  var [searchText, setSearchText] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [searchText, setSearchText] = useState('');
 
-  var filtered = fullBookings.filter(function (b) {
-    var matchesStatus = statusFilter === 'All' || b.status === statusFilter;
-    var matchesSearch = searchText === '' || b.customer.toLowerCase().indexOf(searchText.toLowerCase()) !== -1 || b.id.toLowerCase().indexOf(searchText.toLowerCase()) !== -1;
+  const filtered = fullBookings.filter((b) => {
+    const matchesStatus = statusFilter === 'All' || b.status === statusFilter;
+    const matchesSearch = searchText === '' || b.customer.toLowerCase().includes(searchText.toLowerCase()) || b.id.toLowerCase().includes(searchText.toLowerCase());
     return matchesStatus && matchesSearch;
   });
 
@@ -182,7 +182,7 @@ function BookingsView() {
       >
         <select
           value={statusFilter}
-          onChange={function (e) { setStatusFilter(e.target.value); }}
+          onChange={(e) => { setStatusFilter(e.target.value); }}
           className="rounded-lg px-3 py-2 text-sm outline-none"
           style={{ backgroundColor: '#141414', color: '#F5F0E8', border: '1px solid #2A2520' }}
         >
@@ -199,7 +199,7 @@ function BookingsView() {
             type="text"
             placeholder="Search bookings..."
             value={searchText}
-            onChange={function (e) { setSearchText(e.target.value); }}
+            onChange={(e) => { setSearchText(e.target.value); }}
             className="bg-transparent text-sm outline-none w-40"
             style={{ color: '#F5F0E8' }}
           />
@@ -215,13 +215,13 @@ function BookingsView() {
           <table className="w-full text-left">
             <thead>
               <tr style={{ borderBottom: '1px solid #2A2520' }}>
-                {['ID', 'Customer', 'Phone', 'Route', 'Vehicle', 'Driver', 'Date', 'Time', 'Status', 'Amount'].map(function (h) {
+                {['ID', 'Customer', 'Phone', 'Route', 'Vehicle', 'Driver', 'Date', 'Time', 'Status', 'Amount'].map((h) => {
                   return <th key={h} className="px-4 py-3 text-xs font-medium uppercase tracking-wider" style={{ color: '#9A9590' }}>{h}</th>;
                 })}
               </tr>
             </thead>
             <tbody>
-              {filtered.map(function (b) {
+              {filtered.map((b) => {
                 return (
                   <tr key={b.id} style={{ borderBottom: '1px solid #2A2520' }} className="hover:bg-white/5 transition-colors">
                     <td className="px-4 py-3 text-sm font-mono" style={{ color: '#D4AF37' }}>{b.id}</td>
@@ -266,14 +266,14 @@ function BookingsView() {
 
 /* --- FleetView --- */
 
-var fleetStats = [
+const fleetStats = [
   { label: 'Total Vehicles', value: '23', icon: CarIcon, color: '#D4AF37' },
   { label: 'Available', value: '18', icon: MapPinIcon, color: '#22C55E' },
   { label: 'In Service', value: '4', icon: ClockIcon, color: '#3B82F6' },
   { label: 'Maintenance', value: '1', icon: WrenchIcon, color: '#EF4444' },
 ];
 
-var fleetVehicles = [
+const fleetVehicles = [
   { name: 'Mercedes S-Class', category: 'Sedan Luxury', plate: 'ABC-123', status: 'Available', mileage: '12,450 km', image: '/flota/mercedes-s-class.png' },
   { name: 'Cadillac XTS', category: 'Sedan Premium', plate: 'DEF-456', status: 'In Service', mileage: '28,300 km', image: '/flota/cadillac-xts.png' },
   { name: 'Cadillac Escalade', category: 'SUV Luxury', plate: 'GHI-789', status: 'Available', mileage: '9,870 km', image: '/flota/cadillac-escalade.png' },
@@ -296,8 +296,8 @@ function FleetView() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {fleetStats.map(function (card) {
-          var IconComp = card.icon;
+        {fleetStats.map((card) => {
+          const IconComp = card.icon;
           return (
             <div key={card.label} className="rounded-xl p-5" style={{ backgroundColor: '#1E1E1E', border: '1px solid #2A2520' }}>
               <div className="flex items-center justify-between mb-3">
@@ -314,7 +314,7 @@ function FleetView() {
 
       {/* Vehicle Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {fleetVehicles.map(function (v) {
+        {fleetVehicles.map((v) => {
           return (
             <div key={v.plate} className="rounded-xl overflow-hidden" style={{ backgroundColor: '#1E1E1E', border: '1px solid #2A2520' }}>
               <div className="h-40 overflow-hidden" style={{ backgroundColor: '#141414' }}>
@@ -345,14 +345,14 @@ function FleetView() {
 
 /* --- DriversView --- */
 
-var driverStats = [
+const driverStats = [
   { label: 'Total Drivers', value: '24', icon: UsersIcon, color: '#D4AF37' },
   { label: 'Active Today', value: '18', icon: TrendingUpIcon, color: '#22C55E' },
   { label: 'On Trip', value: '4', icon: CarIcon, color: '#3B82F6' },
   { label: 'Off Duty', value: '2', icon: ClockIcon, color: '#9A9590' },
 ];
 
-var driversData = [
+const driversData = [
   { name: 'Andres Lopez', idNum: 'CC 1.023.456.789', phone: '+57 310 123 4567', rating: 4.9, trips: 5, status: 'Active', vehicle: 'Mercedes S-Class' },
   { name: 'Felipe Moreno', idNum: 'CC 1.045.678.901', phone: '+57 315 234 5678', rating: 4.8, trips: 3, status: 'On Trip', vehicle: 'Cadillac XTS' },
   { name: 'Ricardo Soto', idNum: 'CC 1.067.890.123', phone: '+57 320 345 6789', rating: 4.7, trips: 4, status: 'Active', vehicle: 'Cadillac Escalade' },
@@ -371,7 +371,7 @@ function getDriverStatusStyle(status: string) {
 }
 
 function renderStars(rating: number) {
-  var stars = [];
+  const stars = [];
   for (var i = 0; i < 5; i++) {
     stars.push(
       <StarIcon
@@ -392,8 +392,8 @@ function DriversView() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {driverStats.map(function (card) {
-          var IconComp = card.icon;
+        {driverStats.map((card) => {
+          const IconComp = card.icon;
           return (
             <div key={card.label} className="rounded-xl p-5" style={{ backgroundColor: '#1E1E1E', border: '1px solid #2A2520' }}>
               <div className="flex items-center justify-between mb-3">
@@ -414,13 +414,13 @@ function DriversView() {
           <table className="w-full text-left">
             <thead>
               <tr style={{ borderBottom: '1px solid #2A2520' }}>
-                {['Name', 'ID', 'Phone', 'Rating', 'Trips Today', 'Status', 'Vehicle Assigned'].map(function (h) {
+                {['Name', 'ID', 'Phone', 'Rating', 'Trips Today', 'Status', 'Vehicle Assigned'].map((h) => {
                   return <th key={h} className="px-4 py-3 text-xs font-medium uppercase tracking-wider" style={{ color: '#9A9590' }}>{h}</th>;
                 })}
               </tr>
             </thead>
             <tbody>
-              {driversData.map(function (d) {
+              {driversData.map((d) => {
                 return (
                   <tr key={d.idNum} style={{ borderBottom: '1px solid #2A2520' }} className="hover:bg-white/5 transition-colors">
                     <td className="px-4 py-3 text-sm font-medium" style={{ color: '#F5F0E8' }}>{d.name}</td>
@@ -452,14 +452,14 @@ function DriversView() {
 
 /* --- CustomersView --- */
 
-var customerStats = [
+const customerStats = [
   { label: 'Total Customers', value: '1,247', icon: UsersIcon, color: '#D4AF37' },
   { label: 'New This Month', value: '89', icon: TrendingUpIcon, color: '#22C55E' },
   { label: 'VIP Members', value: '156', icon: CrownIcon, color: '#A855F7' },
   { label: 'Avg Satisfaction', value: '4.8', icon: StarIcon, color: '#F59E0B' },
 ];
 
-var customersData = [
+const customersData = [
   { name: 'Maria Garcia', email: 'maria.garcia@email.com', phone: '+57 310 234 5678', trips: 42, spent: '$5,240', since: 'Jan 2024', tier: 'Platinum' },
   { name: 'Carlos Ruiz', email: 'carlos.ruiz@email.com', phone: '+57 315 876 5432', trips: 28, spent: '$3,150', since: 'Mar 2024', tier: 'Gold' },
   { name: 'Ana Torres', email: 'ana.torres@email.com', phone: '+57 320 111 2233', trips: 15, spent: '$1,890', since: 'Jun 2024', tier: 'Gold' },
@@ -483,8 +483,8 @@ function CustomersView() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {customerStats.map(function (card) {
-          var IconComp = card.icon;
+        {customerStats.map((card) => {
+          const IconComp = card.icon;
           return (
             <div key={card.label} className="rounded-xl p-5" style={{ backgroundColor: '#1E1E1E', border: '1px solid #2A2520' }}>
               <div className="flex items-center justify-between mb-3">
@@ -505,13 +505,13 @@ function CustomersView() {
           <table className="w-full text-left">
             <thead>
               <tr style={{ borderBottom: '1px solid #2A2520' }}>
-                {['Name', 'Email', 'Phone', 'Total Trips', 'Total Spent', 'Member Since', 'Tier'].map(function (h) {
+                {['Name', 'Email', 'Phone', 'Total Trips', 'Total Spent', 'Member Since', 'Tier'].map((h) => {
                   return <th key={h} className="px-4 py-3 text-xs font-medium uppercase tracking-wider" style={{ color: '#9A9590' }}>{h}</th>;
                 })}
               </tr>
             </thead>
             <tbody>
-              {customersData.map(function (c) {
+              {customersData.map((c) => {
                 return (
                   <tr key={c.email} style={{ borderBottom: '1px solid #2A2520' }} className="hover:bg-white/5 transition-colors">
                     <td className="px-4 py-3 text-sm font-medium" style={{ color: '#F5F0E8' }}>{c.name}</td>
@@ -538,14 +538,14 @@ function CustomersView() {
 
 /* --- AnalyticsView --- */
 
-var analyticsStats = [
+const analyticsStats = [
   { label: 'Monthly Revenue', value: '$12,450', icon: DollarSignIcon, color: '#22C55E' },
   { label: 'Trip Growth', value: '+18%', icon: TrendingUpIcon, color: '#3B82F6' },
   { label: 'Avg Trip Value', value: '$38', icon: ClipboardListIcon, color: '#D4AF37' },
   { label: 'Customer Retention', value: '92%', icon: UsersIcon, color: '#A855F7' },
 ];
 
-var revenueByCityData = [
+const revenueByCityData = [
   { city: 'Bogota', pct: 45, revenue: '$5,603' },
   { city: 'Medellin', pct: 28, revenue: '$3,486' },
   { city: 'Cartagena', pct: 15, revenue: '$1,868' },
@@ -553,7 +553,7 @@ var revenueByCityData = [
   { city: 'Others', pct: 4, revenue: '$496' },
 ];
 
-var topRoutesData = [
+const topRoutesData = [
   { route: 'Bogota -> Medellin', trips: 245, revenue: '$29,400', avg: '$120' },
   { route: 'Bogota -> Airport', trips: 189, revenue: '$6,615', avg: '$35' },
   { route: 'Medellin -> Rionegro', trips: 156, revenue: '$7,020', avg: '$45' },
@@ -562,7 +562,7 @@ var topRoutesData = [
   { route: 'Cartagena City Tour', trips: 87, revenue: '$8,265', avg: '$95' },
 ];
 
-var peakHoursData = [
+const peakHoursData = [
   { hour: '6 AM', level: 'medium' },
   { hour: '7 AM', level: 'high' },
   { hour: '8 AM', level: 'very high' },
@@ -597,8 +597,8 @@ function AnalyticsView() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {analyticsStats.map(function (card) {
-          var IconComp = card.icon;
+        {analyticsStats.map((card) => {
+          const IconComp = card.icon;
           return (
             <div key={card.label} className="rounded-xl p-5" style={{ backgroundColor: '#1E1E1E', border: '1px solid #2A2520' }}>
               <div className="flex items-center justify-between mb-3">
@@ -617,7 +617,7 @@ function AnalyticsView() {
       <div className="rounded-xl p-5" style={{ backgroundColor: '#1E1E1E', border: '1px solid #2A2520' }}>
         <h4 className="text-sm font-semibold mb-4" style={{ color: '#F5F0E8' }}>Revenue by City</h4>
         <div className="space-y-3">
-          {revenueByCityData.map(function (item) {
+          {revenueByCityData.map((item) => {
             return (
               <div key={item.city} className="space-y-1">
                 <div className="flex items-center justify-between text-xs">
@@ -645,13 +645,13 @@ function AnalyticsView() {
           <table className="w-full text-left">
             <thead>
               <tr style={{ borderBottom: '1px solid #2A2520' }}>
-                {['Route', 'Trips', 'Revenue', 'Avg Price'].map(function (h) {
+                {['Route', 'Trips', 'Revenue', 'Avg Price'].map((h) => {
                   return <th key={h} className="px-4 py-3 text-xs font-medium uppercase tracking-wider" style={{ color: '#9A9590' }}>{h}</th>;
                 })}
               </tr>
             </thead>
             <tbody>
-              {topRoutesData.map(function (r) {
+              {topRoutesData.map((r) => {
                 return (
                   <tr key={r.route} style={{ borderBottom: '1px solid #2A2520' }} className="hover:bg-white/5 transition-colors">
                     <td className="px-4 py-3 text-sm" style={{ color: '#F5F0E8' }}>{r.route}</td>
@@ -670,7 +670,7 @@ function AnalyticsView() {
       <div className="rounded-xl p-5" style={{ backgroundColor: '#1E1E1E', border: '1px solid #2A2520' }}>
         <h4 className="text-sm font-semibold mb-4" style={{ color: '#F5F0E8' }}>Peak Hours</h4>
         <div className="grid grid-cols-6 sm:grid-cols-9 gap-2">
-          {peakHoursData.map(function (h) {
+          {peakHoursData.map((h) => {
             return (
               <div key={h.hour} className="flex flex-col items-center gap-1">
                 <div
@@ -708,7 +708,7 @@ function AnalyticsView() {
 /* --- Main AdminPanel --- */
 
 export function AdminPanel({ isOpen, onClose, user }: AdminPanelProps) {
-  var [activeSection, setActiveSection] = useState<SidebarItem>('dashboard');
+  const [activeSection, setActiveSection] = useState<SidebarItem>('dashboard');
 
   function renderContent() {
     if (activeSection === 'dashboard') return <DashboardView />;
@@ -769,13 +769,13 @@ export function AdminPanel({ isOpen, onClose, user }: AdminPanelProps) {
               className="hidden sm:flex flex-col w-[200px] shrink-0 py-4 overflow-y-auto"
               style={{ backgroundColor: '#141414', borderRight: '1px solid #2A2520' }}
             >
-              {sidebarItems.map(function (item) {
-                var isActive = activeSection === item.key;
-                var IconComp = item.icon;
+              {sidebarItems.map((item) => {
+                const isActive = activeSection === item.key;
+                const IconComp = item.icon;
                 return (
                   <button
                     key={item.key}
-                    onClick={function () { setActiveSection(item.key); }}
+                    onClick={() => { setActiveSection(item.key); }}
                     className={"flex items-center gap-3 px-5 py-3 text-sm font-medium transition-colors w-full text-left " + (isActive ? "" : "hover:bg-white/5")}
                     style={
                       isActive
@@ -795,13 +795,13 @@ export function AdminPanel({ isOpen, onClose, user }: AdminPanelProps) {
               className="flex sm:hidden overflow-x-auto shrink-0 px-2 gap-1 py-2"
               style={{ backgroundColor: '#141414', borderBottom: '1px solid #2A2520' }}
             >
-              {sidebarItems.map(function (item) {
-                var isActive = activeSection === item.key;
-                var IconComp = item.icon;
+              {sidebarItems.map((item) => {
+                const isActive = activeSection === item.key;
+                const IconComp = item.icon;
                 return (
                   <button
                     key={item.key}
-                    onClick={function () { setActiveSection(item.key); }}
+                    onClick={() => { setActiveSection(item.key); }}
                     className={"flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg whitespace-nowrap transition-colors " + (isActive ? "" : "hover:bg-white/5")}
                     style={
                       isActive

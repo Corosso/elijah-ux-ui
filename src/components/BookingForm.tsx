@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPinIcon, CalendarIcon, ArrowRightIcon, LoaderIcon, CarIcon, UsersIcon, BriefcaseIcon, ChevronDownIcon } from 'lucide-react';
+import { MapPinIcon, ArrowRightIcon, LoaderIcon, UsersIcon, BriefcaseIcon } from 'lucide-react';
 import { geocodeAutocomplete, getDirections } from '../api/openrouteservice';
 import type { GeocodeSuggestion, RouteGeometry } from '../api/openrouteservice';
 import { useDebounce } from '../hooks/useDebounce';
@@ -12,6 +12,25 @@ interface BookingFormProps {
     origin: { lat: number; lng: number },
     destination: { lat: number; lng: number }
   ) => void;
+}
+
+const COLOMBIA_CENTER = { lat: 4.65, lng: -74.05 };
+
+const VEHICLE_RATES: Record<number, number> = {
+  1: 3.20,
+  2: 2.80,
+  3: 3.80,
+  4: 3.50,
+  5: 3.60,
+  6: 4.20,
+  7: 5.50,
+};
+
+const INPUT_CLASS = 'w-full bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 rounded py-2.5 pl-3 pr-3 text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all text-sm';
+
+function extractCity(label: string): string {
+  const parts = label.split(',');
+  return parts[0]?.trim() || label;
 }
 
 function AddressInput({ label, placeholder, onSelect }: {
@@ -32,7 +51,7 @@ function AddressInput({ label, placeholder, onSelect }: {
     if (!debouncedText || debouncedText.length < 3) { setSuggestions([]); return; }
     let cancelled = false;
     setLoading(true);
-    geocodeAutocomplete(debouncedText, { lat: 4.65, lng: -74.05 })
+    geocodeAutocomplete(debouncedText, COLOMBIA_CENTER)
       .then((r) => { if (!cancelled) { setSuggestions(r); setIsOpen(r.length > 0); } })
       .catch(() => { if (!cancelled) setSuggestions([]); })
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -40,11 +59,11 @@ function AddressInput({ label, placeholder, onSelect }: {
   }, [debouncedText, selected]);
 
   useEffect(() => {
-    const h = (e: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) setIsOpen(false);
     };
-    document.addEventListener('mousedown', h);
-    return () => document.removeEventListener('mousedown', h);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   return (
@@ -85,101 +104,49 @@ function AddressInput({ label, placeholder, onSelect }: {
   );
 }
 
-var vehicleRates: Record<number, number> = {
-  1: 3.20,
-  2: 2.80,
-  3: 3.80,
-  4: 3.50,
-  5: 3.60,
-  6: 4.20,
-  7: 5.50,
-};
-
-function extractCity(label: string): string {
-  var parts = label.split(',');
-  if (parts.length > 0) {
-    return parts[0].trim();
-  }
-  return label;
-}
-
 export function BookingForm({ onRouteFound }: BookingFormProps) {
-  var _useState1 = useState<1 | 2>(1);
-  var step = _useState1[0];
-  var setStep = _useState1[1];
+  const [step, setStep] = useState<1 | 2>(1);
+  const [origin, setOrigin] = useState<GeocodeSuggestion | null>(null);
+  const [destination, setDestination] = useState<GeocodeSuggestion | null>(null);
+  const [loadingRoute, setLoadingRoute] = useState(false);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+  const [returnTrip, setReturnTrip] = useState(false);
+  const [routeResult, setRouteResult] = useState<RouteGeometry | null>(null);
 
-  var _useState2 = useState<GeocodeSuggestion | null>(null);
-  var origin = _useState2[0];
-  var setOrigin = _useState2[1];
+  const todayStr = new Date().toISOString().split('T')[0];
+  const canSearch = origin !== null && destination !== null && selectedDate !== '' && selectedTime !== '';
 
-  var _useState3 = useState<GeocodeSuggestion | null>(null);
-  var destination = _useState3[0];
-  var setDestination = _useState3[1];
-
-  var _useState4 = useState(false);
-  var loadingRoute = _useState4[0];
-  var setLoadingRoute = _useState4[1];
-
-  var _useState5 = useState('');
-  var selectedDate = _useState5[0];
-  var setSelectedDate = _useState5[1];
-
-  var _useState6 = useState('');
-  var selectedTime = _useState6[0];
-  var setSelectedTime = _useState6[1];
-
-  var _useState7 = useState(false);
-  var returnTrip = _useState7[0];
-  var setReturnTrip = _useState7[1];
-
-  var _useState8 = useState<RouteGeometry | null>(null);
-  var routeResult = _useState8[0];
-  var setRouteResult = _useState8[1];
-
-  var todayStr = new Date().toISOString().split('T')[0];
-
-  var inputCls = 'w-full bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 rounded py-2.5 pl-3 pr-3 text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all text-sm';
-
-  var canSearch = origin !== null && destination !== null && selectedDate !== '' && selectedTime !== '';
-
-  function calculatePrice(vehicleId: number): number {
+  const calculatePrice = (vehicleId: number): number => {
     if (!routeResult) return 0;
-    var distanceKm = routeResult.distance / 1000;
-    var baseFare = 5.00;
-    var rate = vehicleRates[vehicleId] || 3.00;
-    var nightSurcharge = 0;
+    const distanceKm = routeResult.distance / 1000;
+    const baseFare = 5.00;
+    const rate = VEHICLE_RATES[vehicleId] || 3.00;
+    let nightSurcharge = 0;
     if (selectedTime) {
-      var hour = parseInt(selectedTime.split(':')[0], 10);
-      if (hour >= 22 || hour < 5) {
-        nightSurcharge = 10;
-      }
+      const hour = parseInt(selectedTime.split(':')[0], 10);
+      if (hour >= 22 || hour < 5) nightSurcharge = 10;
     }
-    var total = baseFare + (distanceKm * rate) + nightSurcharge;
-    if (returnTrip) {
-      total = total * 2;
-    }
+    let total = baseFare + (distanceKm * rate) + nightSurcharge;
+    if (returnTrip) total *= 2;
     return total;
-  }
+  };
 
-  var handleGetPrices = function () {
+  const handleGetPrices = () => {
     if (!origin || !destination || !onRouteFound) return;
     setLoadingRoute(true);
     getDirections({ lat: origin.lat, lng: origin.lng }, { lat: destination.lat, lng: destination.lng })
-      .then(function (route) {
+      .then((route) => {
         onRouteFound(route, { lat: origin.lat, lng: origin.lng }, { lat: destination.lat, lng: destination.lng });
         setRouteResult(route);
         setStep(2);
       })
       .catch(console.error)
-      .finally(function () { setLoadingRoute(false); });
+      .finally(() => setLoadingRoute(false));
   };
 
-  var handleEdit = function () {
-    setStep(1);
-  };
-
-  var handleSelect = function (vehicleId: number, vehicleName: string, price: number) {
-    alert('Selected ' + vehicleName + ' \u2014 $' + price.toFixed(2) + ' USD. Payment integration coming soon.');
+  const handleSelect = (vehicleName: string, price: number) => {
+    alert(`Selected ${vehicleName} — $${price.toFixed(2)} USD. Payment integration coming soon.`);
   };
 
   return (
@@ -202,15 +169,14 @@ export function BookingForm({ onRouteFound }: BookingFormProps) {
             <AddressInput label="Origin" placeholder="Pickup address" onSelect={setOrigin} />
             <AddressInput label="Destination" placeholder="Destination address" onSelect={setDestination} />
 
-            {/* Pick-up Date / Time */}
             <div>
               <label className="text-[10px] font-semibold text-gold uppercase tracking-widest mb-1 block">Pick-up Date / Time</label>
               <input
                 type="date"
                 min={todayStr}
                 value={selectedDate}
-                onChange={function (e) { setSelectedDate(e.target.value); }}
-                className={inputCls}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className={INPUT_CLASS}
               />
               <AnimatePresence>
                 {selectedDate !== '' && (
@@ -224,27 +190,25 @@ export function BookingForm({ onRouteFound }: BookingFormProps) {
                     <input
                       type="time"
                       value={selectedTime}
-                      onChange={function (e) { setSelectedTime(e.target.value); }}
-                      className={inputCls + ' mt-2'}
+                      onChange={(e) => setSelectedTime(e.target.value)}
+                      className={INPUT_CLASS + ' mt-2'}
                     />
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Return trip checkbox */}
             <div className="flex items-center gap-2 mt-1">
               <input
                 type="checkbox"
                 id="returnTrip"
                 checked={returnTrip}
-                onChange={function (e) { setReturnTrip(e.target.checked); }}
+                onChange={(e) => setReturnTrip(e.target.checked)}
                 className="w-4 h-4 rounded border-white/30 text-gold focus:ring-gold bg-white/10 checked:bg-gold accent-gold cursor-pointer"
               />
               <label htmlFor="returnTrip" className="text-sm text-text-secondary cursor-pointer">Add return trip</label>
             </div>
 
-            {/* GET PRICES button */}
             <button
               disabled={loadingRoute || !canSearch}
               onClick={handleGetPrices}
@@ -268,12 +232,11 @@ export function BookingForm({ onRouteFound }: BookingFormProps) {
             transition={{ duration: 0.3 }}
             className="flex flex-col"
           >
-            {/* Header */}
             <div className="p-4 border-b border-white/10">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-semibold text-gold uppercase tracking-widest">Step 2 of 2 \u2014 Vehicle Class</span>
+                <span className="text-[10px] font-semibold text-gold uppercase tracking-widest">Step 2 of 2 — Vehicle Class</span>
                 <button
-                  onClick={handleEdit}
+                  onClick={() => setStep(1)}
                   className="text-[11px] font-semibold text-gold uppercase tracking-wider hover:text-gold-hover transition-colors"
                 >
                   EDIT
@@ -281,28 +244,22 @@ export function BookingForm({ onRouteFound }: BookingFormProps) {
               </div>
               <p className="text-xs text-text-secondary">
                 {origin ? extractCity(origin.label) : 'Origin'}
-                {' \u2192 '}
+                {' → '}
                 {destination ? extractCity(destination.label) : 'Destination'}
-                {' \u00B7 '}
-                {selectedDate}
-                {' '}
-                {selectedTime}
+                {' · '}
+                {selectedDate} {selectedTime}
               </p>
             </div>
 
-            {/* Vehicle list */}
             <div className="max-h-[60vh] overflow-y-auto">
-              {vehicles.map(function (v) {
-                var price = calculatePrice(v.id);
+              {vehicles.map((v) => {
+                const price = calculatePrice(v.id);
                 return (
                   <div
                     key={v.id}
                     className="flex items-center gap-3 p-4 border-b border-white/10 hover:bg-white/5 transition-colors"
                   >
-                    {/* Left: image */}
                     <img src={v.image} alt={v.name} className="w-28 h-20 object-contain flex-shrink-0" />
-
-                    {/* Center: info */}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-text-primary">{v.name}</p>
                       <p className="text-[11px] text-text-secondary">{v.category}</p>
@@ -317,14 +274,12 @@ export function BookingForm({ onRouteFound }: BookingFormProps) {
                         </div>
                       </div>
                     </div>
-
-                    {/* Right: price + select */}
                     <div className="flex flex-col items-end flex-shrink-0">
-                      <span className="text-lg font-bold text-gold">{'$' + price.toFixed(2)}</span>
+                      <span className="text-lg font-bold text-gold">${price.toFixed(2)}</span>
                       <span className="text-[9px] text-text-secondary mb-1">USD</span>
                       <span className="text-[9px] text-text-secondary/70 mb-2">Price includes taxes & tolls</span>
                       <button
-                        onClick={function () { handleSelect(v.id, v.name, price); }}
+                        onClick={() => handleSelect(v.name, price)}
                         className="px-4 py-1.5 bg-gold hover:bg-gold-hover text-white text-[11px] font-semibold rounded-sm transition-colors uppercase tracking-wider"
                       >
                         SELECT
