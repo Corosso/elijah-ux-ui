@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPinIcon, CalendarIcon, ArrowRightIcon, LoaderIcon, CarIcon, UsersIcon, ChevronDownIcon } from 'lucide-react';
+import { MapPinIcon, CalendarIcon, ArrowRightIcon, LoaderIcon, CarIcon, UsersIcon, BriefcaseIcon, ChevronDownIcon } from 'lucide-react';
 import { geocodeAutocomplete, getDirections } from '../api/openrouteservice';
 import type { GeocodeSuggestion, RouteGeometry } from '../api/openrouteservice';
 import { useDebounce } from '../hooks/useDebounce';
@@ -85,16 +85,6 @@ function AddressInput({ label, placeholder, onSelect }: {
   );
 }
 
-interface FareEstimate {
-  baseFare: number;
-  distanceFare: number;
-  vehicleSurcharge: number;
-  timeSurcharge: number;
-  total: number;
-  currency: string;
-  distanceKm: number;
-}
-
 var vehicleRates: Record<number, number> = {
   1: 3.20,
   2: 2.80,
@@ -105,20 +95,71 @@ var vehicleRates: Record<number, number> = {
   7: 5.50,
 };
 
+function extractCity(label: string): string {
+  var parts = label.split(',');
+  if (parts.length > 0) {
+    return parts[0].trim();
+  }
+  return label;
+}
+
 export function BookingForm({ onRouteFound }: BookingFormProps) {
-  const [activeTab, setActiveTab] = useState<'point' | 'hourly'>('point');
-  const [origin, setOrigin] = useState<GeocodeSuggestion | null>(null);
-  const [destination, setDestination] = useState<GeocodeSuggestion | null>(null);
-  const [loadingRoute, setLoadingRoute] = useState(false);
-  const [selectedDate, setSelectedDate] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
-  const [selectedVehicle, setSelectedVehicle] = useState<number | null>(null);
-  const [returnTrip, setReturnTrip] = useState(false);
-  const [fareEstimate, setFareEstimate] = useState<FareEstimate | null>(null);
+  var _useState1 = useState<1 | 2>(1);
+  var step = _useState1[0];
+  var setStep = _useState1[1];
+
+  var _useState2 = useState<GeocodeSuggestion | null>(null);
+  var origin = _useState2[0];
+  var setOrigin = _useState2[1];
+
+  var _useState3 = useState<GeocodeSuggestion | null>(null);
+  var destination = _useState3[0];
+  var setDestination = _useState3[1];
+
+  var _useState4 = useState(false);
+  var loadingRoute = _useState4[0];
+  var setLoadingRoute = _useState4[1];
+
+  var _useState5 = useState('');
+  var selectedDate = _useState5[0];
+  var setSelectedDate = _useState5[1];
+
+  var _useState6 = useState('');
+  var selectedTime = _useState6[0];
+  var setSelectedTime = _useState6[1];
+
+  var _useState7 = useState(false);
+  var returnTrip = _useState7[0];
+  var setReturnTrip = _useState7[1];
+
+  var _useState8 = useState<RouteGeometry | null>(null);
+  var routeResult = _useState8[0];
+  var setRouteResult = _useState8[1];
 
   var todayStr = new Date().toISOString().split('T')[0];
 
   var inputCls = 'w-full bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 rounded py-2.5 pl-3 pr-3 text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all text-sm';
+
+  var canSearch = origin !== null && destination !== null && selectedDate !== '' && selectedTime !== '';
+
+  function calculatePrice(vehicleId: number): number {
+    if (!routeResult) return 0;
+    var distanceKm = routeResult.distance / 1000;
+    var baseFare = 5.00;
+    var rate = vehicleRates[vehicleId] || 3.00;
+    var nightSurcharge = 0;
+    if (selectedTime) {
+      var hour = parseInt(selectedTime.split(':')[0], 10);
+      if (hour >= 22 || hour < 5) {
+        nightSurcharge = 10;
+      }
+    }
+    var total = baseFare + (distanceKm * rate) + nightSurcharge;
+    if (returnTrip) {
+      total = total * 2;
+    }
+    return total;
+  }
 
   var handleGetPrices = function () {
     if (!origin || !destination || !onRouteFound) return;
@@ -126,46 +167,20 @@ export function BookingForm({ onRouteFound }: BookingFormProps) {
     getDirections({ lat: origin.lat, lng: origin.lng }, { lat: destination.lat, lng: destination.lng })
       .then(function (route) {
         onRouteFound(route, { lat: origin.lat, lng: origin.lng }, { lat: destination.lat, lng: destination.lng });
-
-        var distanceKm = route.distance / 1000;
-        var baseFare = 5.00;
-        var rate = selectedVehicle !== null && vehicleRates[selectedVehicle] ? vehicleRates[selectedVehicle] : 3.00;
-        var distanceFare = distanceKm * rate;
-
-        var timeSurcharge = 0;
-        if (selectedTime) {
-          var hour = parseInt(selectedTime.split(':')[0], 10);
-          if (hour >= 22 || hour < 6) {
-            timeSurcharge = 10;
-          }
-        }
-
-        var vehicleSurcharge = 0;
-        var total = baseFare + distanceFare + timeSurcharge;
-        if (returnTrip) {
-          total = total * 2;
-        }
-
-        setFareEstimate({
-          baseFare: baseFare,
-          distanceFare: distanceFare,
-          vehicleSurcharge: vehicleSurcharge,
-          timeSurcharge: timeSurcharge,
-          total: total,
-          currency: 'USD',
-          distanceKm: distanceKm,
-        });
+        setRouteResult(route);
+        setStep(2);
       })
       .catch(console.error)
       .finally(function () { setLoadingRoute(false); });
   };
 
-  var canSearch = origin !== null && destination !== null && selectedDate !== '' && selectedTime !== '' && selectedVehicle !== null;
+  var handleEdit = function () {
+    setStep(1);
+  };
 
-  var isPointActive = activeTab === 'point';
-  var isHourlyActive = activeTab === 'hourly';
-  var activeCls = 'flex-1 py-4 text-sm font-medium transition-colors relative text-gold';
-  var inactiveCls = 'flex-1 py-4 text-sm font-medium transition-colors relative text-text-secondary hover:text-text-primary';
+  var handleSelect = function (vehicleId: number, vehicleName: string, price: number) {
+    alert('Selected ' + vehicleName + ' \u2014 $' + price.toFixed(2) + ' USD. Payment integration coming soon.');
+  };
 
   return (
     <motion.div
@@ -174,144 +189,154 @@ export function BookingForm({ onRouteFound }: BookingFormProps) {
       transition={{ duration: 0.8, delay: 0.4 }}
       className="bg-bg-primary/90 dark:bg-bg-elevated/90 backdrop-blur-md rounded-lg shadow-xl border border-white/20 dark:border-white/10 overflow-hidden w-full max-w-md mx-auto relative z-10"
     >
-      <div className="flex border-b border-border relative">
-        <button onClick={function () { setActiveTab('point'); }} className={isPointActive ? activeCls : inactiveCls}>
-          Point to Point
-          {isPointActive && <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold" />}
-        </button>
-        <button onClick={function () { setActiveTab('hourly'); }} className={isHourlyActive ? activeCls : inactiveCls}>
-          By the Hour
-          {isHourlyActive && <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold" />}
-        </button>
-      </div>
-      <div className="p-5 flex flex-col gap-4">
-        <AddressInput label="Origin" placeholder="Pickup address" onSelect={setOrigin} />
-        <AddressInput label="Destination" placeholder="Destination address" onSelect={setDestination} />
+      <AnimatePresence mode="wait">
+        {step === 1 && (
+          <motion.div
+            key="step1"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+            className="p-5 flex flex-col gap-4"
+          >
+            <AddressInput label="Origin" placeholder="Pickup address" onSelect={setOrigin} />
+            <AddressInput label="Destination" placeholder="Destination address" onSelect={setDestination} />
 
-        {/* Date & Time */}
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-[10px] font-semibold text-gold uppercase tracking-widest mb-1 block">Date</label>
-            <input
-              type="date"
-              min={todayStr}
-              value={selectedDate}
-              onChange={function (e) { setSelectedDate(e.target.value); }}
-              className={inputCls}
-            />
-          </div>
-          <div>
-            <label className="text-[10px] font-semibold text-gold uppercase tracking-widest mb-1 block">Time</label>
-            <input
-              type="time"
-              value={selectedTime}
-              onChange={function (e) { setSelectedTime(e.target.value); }}
-              className={inputCls}
-            />
-          </div>
-        </div>
+            {/* Pick-up Date / Time */}
+            <div>
+              <label className="text-[10px] font-semibold text-gold uppercase tracking-widest mb-1 block">Pick-up Date / Time</label>
+              <input
+                type="date"
+                min={todayStr}
+                value={selectedDate}
+                onChange={function (e) { setSelectedDate(e.target.value); }}
+                className={inputCls}
+              />
+              <AnimatePresence>
+                {selectedDate !== '' && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="overflow-hidden"
+                  >
+                    <input
+                      type="time"
+                      value={selectedTime}
+                      onChange={function (e) { setSelectedTime(e.target.value); }}
+                      className={inputCls + ' mt-2'}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
-        {/* Vehicle Selector */}
-        <div>
-          <label className="text-[10px] font-semibold text-gold uppercase tracking-widest mb-1 block">Vehicle</label>
-          <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1">
-            {vehicles.map(function (v) {
-              var isSelected = selectedVehicle === v.id;
-              var rate = vehicleRates[v.id] || 3.00;
-              return (
-                <button
-                  key={v.id}
-                  type="button"
-                  onClick={function () { setSelectedVehicle(v.id); }}
-                  className={
-                    'flex flex-col items-center p-2 rounded border transition-all text-xs ' +
-                    (isSelected
-                      ? 'border-gold bg-gold/10'
-                      : 'border-white/20 bg-white/5 hover:border-white/40')
-                  }
-                >
-                  <img src={v.image} alt={v.name} className="h-12 object-contain mb-1" />
-                  <span className="text-text-primary font-medium text-[11px] leading-tight text-center">{v.name}</span>
-                  <span className="text-text-secondary text-[9px]">{v.category}</span>
-                  <div className="flex items-center gap-1 mt-0.5 text-text-secondary">
-                    <UsersIcon className="w-3 h-3" />
-                    <span className="text-[9px]">{v.passengers}</span>
-                  </div>
-                  <span className="text-gold text-[10px] font-semibold mt-0.5">{'$' + rate.toFixed(2) + '/km'}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+            {/* Return trip checkbox */}
+            <div className="flex items-center gap-2 mt-1">
+              <input
+                type="checkbox"
+                id="returnTrip"
+                checked={returnTrip}
+                onChange={function (e) { setReturnTrip(e.target.checked); }}
+                className="w-4 h-4 rounded border-white/30 text-gold focus:ring-gold bg-white/10 checked:bg-gold accent-gold cursor-pointer"
+              />
+              <label htmlFor="returnTrip" className="text-sm text-text-secondary cursor-pointer">Add return trip</label>
+            </div>
 
-        {/* Return trip checkbox */}
-        <div className="flex items-center gap-2 mt-1">
-          <input
-            type="checkbox"
-            id="returnTrip"
-            checked={returnTrip}
-            onChange={function (e) { setReturnTrip(e.target.checked); }}
-            className="w-4 h-4 rounded border-white/30 text-gold focus:ring-gold bg-white/10 checked:bg-gold accent-gold cursor-pointer"
-          />
-          <label htmlFor="returnTrip" className="text-sm text-text-secondary cursor-pointer">Add return trip</label>
-        </div>
-
-        {/* GET PRICES button */}
-        <button
-          disabled={loadingRoute || !canSearch}
-          onClick={handleGetPrices}
-          className="w-full mt-2 py-3 bg-gold hover:bg-gold-hover text-white font-medium rounded-sm transition-colors flex items-center justify-center gap-2 group animate-shimmer disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          {loadingRoute ? (
-            <><LoaderIcon className="w-4 h-4 animate-spin" /> Calculating...</>
-          ) : (
-            <>GET PRICES <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></>
-          )}
-        </button>
-
-        {/* Fare Estimate */}
-        <AnimatePresence>
-          {fareEstimate !== null && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.3 }}
-              className="bg-white/10 border border-white/20 rounded-lg p-4"
+            {/* GET PRICES button */}
+            <button
+              disabled={loadingRoute || !canSearch}
+              onClick={handleGetPrices}
+              className="w-full mt-2 py-3 bg-gold hover:bg-gold-hover text-white font-medium rounded-sm transition-colors flex items-center justify-center gap-2 group animate-shimmer disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <h4 className="text-gold font-semibold text-sm mb-3">Estimated Fare</h4>
-              <div className="flex flex-col gap-1.5 text-sm">
-                <div className="flex justify-between text-text-secondary">
-                  <span>Base fare</span>
-                  <span>{'$' + fareEstimate.baseFare.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-text-secondary">
-                  <span>{'Distance (' + fareEstimate.distanceKm.toFixed(1) + ' km)'}</span>
-                  <span>{'$' + fareEstimate.distanceFare.toFixed(2)}</span>
-                </div>
-                {fareEstimate.timeSurcharge > 0 && (
-                  <div className="flex justify-between text-text-secondary">
-                    <span>Night surcharge</span>
-                    <span>{'$' + fareEstimate.timeSurcharge.toFixed(2)}</span>
-                  </div>
-                )}
-                {returnTrip && (
-                  <div className="flex justify-between text-text-secondary">
-                    <span>Return trip</span>
-                    <span>x2</span>
-                  </div>
-                )}
-                <div className="border-t border-white/20 my-1" />
-                <div className="flex justify-between items-center">
-                  <span className="text-text-primary font-bold text-base">Total</span>
-                  <span className="text-gold font-bold text-lg">{'$' + fareEstimate.total.toFixed(2) + ' USD'}</span>
-                </div>
+              {loadingRoute ? (
+                <><LoaderIcon className="w-4 h-4 animate-spin" /> Calculating...</>
+              ) : (
+                <>GET PRICES <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></>
+              )}
+            </button>
+          </motion.div>
+        )}
+
+        {step === 2 && (
+          <motion.div
+            key="step2"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{ duration: 0.3 }}
+            className="flex flex-col"
+          >
+            {/* Header */}
+            <div className="p-4 border-b border-white/10">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-semibold text-gold uppercase tracking-widest">Step 2 of 2 \u2014 Vehicle Class</span>
+                <button
+                  onClick={handleEdit}
+                  className="text-[11px] font-semibold text-gold uppercase tracking-wider hover:text-gold-hover transition-colors"
+                >
+                  EDIT
+                </button>
               </div>
-              <p className="text-[10px] text-text-secondary/70 mt-2">Final price may vary. Tolls not included.</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+              <p className="text-xs text-text-secondary">
+                {origin ? extractCity(origin.label) : 'Origin'}
+                {' \u2192 '}
+                {destination ? extractCity(destination.label) : 'Destination'}
+                {' \u00B7 '}
+                {selectedDate}
+                {' '}
+                {selectedTime}
+              </p>
+            </div>
+
+            {/* Vehicle list */}
+            <div className="max-h-[60vh] overflow-y-auto">
+              {vehicles.map(function (v) {
+                var price = calculatePrice(v.id);
+                return (
+                  <div
+                    key={v.id}
+                    className="flex items-center gap-3 p-4 border-b border-white/10 hover:bg-white/5 transition-colors"
+                  >
+                    {/* Left: image */}
+                    <img src={v.image} alt={v.name} className="w-28 h-20 object-contain flex-shrink-0" />
+
+                    {/* Center: info */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-text-primary">{v.name}</p>
+                      <p className="text-[11px] text-text-secondary">{v.category}</p>
+                      <div className="flex items-center gap-3 mt-1">
+                        <div className="flex items-center gap-1 text-text-secondary">
+                          <UsersIcon className="w-3.5 h-3.5" />
+                          <span className="text-[11px]">{v.passengers}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-text-secondary">
+                          <BriefcaseIcon className="w-3.5 h-3.5" />
+                          <span className="text-[11px]">{v.luggage}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right: price + select */}
+                    <div className="flex flex-col items-end flex-shrink-0">
+                      <span className="text-lg font-bold text-gold">{'$' + price.toFixed(2)}</span>
+                      <span className="text-[9px] text-text-secondary mb-1">USD</span>
+                      <span className="text-[9px] text-text-secondary/70 mb-2">Price includes taxes & tolls</span>
+                      <button
+                        onClick={function () { handleSelect(v.id, v.name, price); }}
+                        className="px-4 py-1.5 bg-gold hover:bg-gold-hover text-white text-[11px] font-semibold rounded-sm transition-colors uppercase tracking-wider"
+                      >
+                        SELECT
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
