@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MoonIcon, SunIcon, MenuIcon, XIcon, UserIcon, LogOutIcon, LayoutDashboardIcon, MailIcon, LockKeyholeIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
+import { MoonIcon, SunIcon, MenuIcon, XIcon, UserIcon, LogOutIcon, MailIcon, LockKeyholeIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { navLinks } from '../data';
 
 interface NavbarProps {
@@ -9,21 +10,17 @@ interface NavbarProps {
   user: string | null;
   onLogin: () => void;
   onLogout: () => void;
-  onAdminPanel?: () => void;
 }
 
-export function Navbar({ isDark, toggleDark, user, onLogin, onLogout, onAdminPanel }: NavbarProps) {
+export function Navbar({ isDark, toggleDark, user, onLogin, onLogout }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [hasEverScrolled, setHasEverScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrolled = window.scrollY > 20;
-      setIsScrolled(scrolled);
-      if (scrolled) setHasEverScrolled(true);
+      setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -32,20 +29,19 @@ export function Navbar({ isDark, toggleDark, user, onLogin, onLogout, onAdminPan
   return (
     <>
     <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: hasEverScrolled ? 0 : -100 }}
-      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-colors transition-[padding,background-color,border-color,backdrop-filter,box-shadow] duration-300 ${hasEverScrolled ? 'bg-bg-surface/80 backdrop-blur-md shadow-sm border-b border-border py-2' : 'bg-transparent py-4'}`}
+      initial={{ y: 0 }}
+      animate={{ y: 0 }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-colors transition-[padding,background-color,border-color,backdrop-filter,box-shadow] duration-300 ${isScrolled ? 'bg-bg-surface/80 backdrop-blur-md shadow-sm border-b border-border py-2' : 'bg-black/30 backdrop-blur-sm py-4'}`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3">
             <img src="/logo.png" alt="Elijah Logo" className="h-8 w-auto object-contain" />
-            <span className={`font-serif text-xl tracking-[0.2em] uppercase transition-colors text-glow-gold ${hasEverScrolled ? "text-text-primary" : "text-white"}`}>
+            <span className={`font-serif text-xl tracking-[0.2em] uppercase transition-colors text-glow-gold ${isScrolled ? "text-text-primary" : "text-white"}`}>
               Elijah
             </span>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
@@ -54,7 +50,7 @@ export function Navbar({ isDark, toggleDark, user, onLogin, onLogout, onAdminPan
                 <a
                   key={link.name}
                   href={link.href}
-                  className={`text-sm font-medium hover:text-gold transition-colors ${hasEverScrolled ? "text-text-secondary" : "text-white/70"}`}
+                  className={`text-sm font-medium hover:text-gold transition-colors ${isScrolled ? "text-text-secondary" : "text-white/90"}`}
                 >
                   {link.name}
                 </a>
@@ -67,7 +63,7 @@ export function Navbar({ isDark, toggleDark, user, onLogin, onLogout, onAdminPan
 
               <button
                 onClick={toggleDark}
-                className="p-2 rounded-full hover:bg-bg-elevated transition-colors text-text-secondary hover:text-gold"
+                className={`p-2 rounded-full transition-colors hover:text-gold ${isScrolled ? 'text-text-secondary hover:bg-bg-elevated' : 'text-white'}`}
                 aria-label="Toggle dark mode"
               >
                 <motion.div
@@ -82,17 +78,17 @@ export function Navbar({ isDark, toggleDark, user, onLogin, onLogout, onAdminPan
               {user ? (
                 <div className="flex items-center gap-2">
                   <UserIcon className="w-4 h-4 text-gold" />
-                  <span className={`text-sm font-medium ${hasEverScrolled ? "text-text-primary" : "text-white"}`}>{user}</span>
+                  <span className={`text-sm font-medium ${isScrolled ? "text-text-primary" : "text-white"}`}>{user}</span>
                   <button onClick={onLogout} className="p-1 text-text-secondary hover:text-gold transition-colors" aria-label="Logout">
                     <LogOutIcon className="w-4 h-4" />
                   </button>
                 </div>
               ) : (
-                <button onClick={() => setShowLoginModal(true)} className={`text-sm font-medium hover:text-gold transition-colors ${hasEverScrolled ? "text-text-primary" : "text-white"}`}>
+                <button onClick={() => setShowLoginModal(true)} className={`text-sm font-medium hover:text-gold transition-colors ${isScrolled ? "text-text-primary" : "text-white"}`}>
                   Login
                 </button>
               )}
-              {user && onAdminPanel && (                <button onClick={onAdminPanel} className="p-2 rounded-full hover:bg-bg-elevated transition-colors text-text-secondary hover:text-gold" aria-label="Admin Panel">                  <LayoutDashboardIcon className="w-5 h-5" />                </button>              )}
+
               <button className="px-5 py-2.5 bg-gold hover:bg-gold-hover text-white text-sm font-medium rounded-sm transition-colors animate-shimmer">
                 Book
               </button>
@@ -149,7 +145,7 @@ export function Navbar({ isDark, toggleDark, user, onLogin, onLogout, onAdminPan
                     Book
                   </button>
                 </div>
-                {user && onAdminPanel && (                  <button onClick={() => { onAdminPanel(); setIsMobileMenuOpen(false); }} className="w-full py-3 border border-gold text-gold font-medium rounded-sm flex items-center justify-center gap-2">                    <LayoutDashboardIcon className="w-4 h-4" /> Admin Panel                  </button>                )}
+
               </div>
             </div>
           </motion.div>

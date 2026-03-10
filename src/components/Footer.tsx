@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { InstagramIcon, TwitterIcon, LinkedinIcon, FacebookIcon } from 'lucide-react';
 import { contactInfo } from '../data';
-import { LegalModal } from './LegalModal';
 
 const socialIcons = {
   instagram: InstagramIcon,
@@ -11,7 +10,6 @@ const socialIcons = {
 };
 
 export function Footer() {
-  const [legalModal, setLegalModal] = useState<"terms" | "privacy" | "cookies" | null>(null);
   return (
     <footer className="bg-[#0A0A0A] pt-20 pb-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -85,13 +83,12 @@ export function Footer() {
             &copy; {new Date().getFullYear()} Elijah. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <button onClick={() => setLegalModal("terms")} className="text-[#9A9590] hover:text-gold text-sm transition-colors">Terms</button>
-            <button onClick={() => setLegalModal("privacy")} className="text-[#9A9590] hover:text-gold text-sm transition-colors">Privacy</button>
-            <button onClick={() => setLegalModal("cookies")} className="text-[#9A9590] hover:text-gold text-sm transition-colors">Cookies</button>
+            <Link to="/legal#terms" className="text-[#9A9590] hover:text-gold text-sm transition-colors">Terms</Link>
+            <Link to="/legal#privacy" className="text-[#9A9590] hover:text-gold text-sm transition-colors">Privacy</Link>
+            <Link to="/legal#cookies" className="text-[#9A9590] hover:text-gold text-sm transition-colors">Cookies</Link>
           </div>
         </div>
       </div>
-      <LegalModal isOpen={legalModal !== null} onClose={() => setLegalModal(null)} title="" type={legalModal || "terms"} />
     </footer>
   );
 }

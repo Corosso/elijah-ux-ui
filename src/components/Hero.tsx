@@ -15,7 +15,7 @@ export function Hero({ isDark }: HeroProps) {
   const [route, setRoute] = useState<RouteGeometry | null>(null);
   const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [destCoords, setDestCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const showMap = route !== null;
+  const showRoute = route !== null;
 
   const handleRouteFound = useCallback(
     (r: RouteGeometry, o: { lat: number; lng: number }, d: { lat: number; lng: number }) => {
@@ -29,43 +29,17 @@ export function Hero({ isDark }: HeroProps) {
   return (
     <section className="relative overflow-hidden bg-bg-primary">
       <div className="relative w-full min-h-[440px] flex items-center">
-        {/* Background layers */}
+        {/* Map always visible as background */}
         <div className="absolute inset-0 z-0">
-          <AnimatePresence>
-            {!showMap && (
-              <motion.div
-                key="hero-image"
-                initial={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.8 }}
-                className="absolute inset-0"
-              >
-                <img src="/image.png" alt="Luxury Chauffeur Service" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/30" />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <AnimatePresence>
-            {showMap && (
-              <motion.div
-                key="hero-map"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8 }}
-                className="absolute inset-0"
-              >
-                <MapPreview isDark={isDark} route={route} origin={originCoords} destination={destCoords} />
-                
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <MapPreview isDark={isDark} route={route} origin={originCoords} destination={destCoords} />
+          {/* Gradient overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/30 pointer-events-none" />
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 pointer-events-none pt-20 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center py-10">
           {/* Left - Text (hidden when route is found) */}
           <AnimatePresence>
-            {!showMap && (
+            {!showRoute && (
               <motion.div
                 key="hero-text"
                 initial={{ opacity: 1 }}
@@ -111,9 +85,9 @@ export function Hero({ isDark }: HeroProps) {
           </div>
         </div>
 
-        {/* Route Summary - small floating card, bottom-right */}
+        {/* Route Summary - small floating card, bottom-left */}
         <AnimatePresence>
-          {showMap && route && (
+          {showRoute && route && (
             <motion.div
               key="route-summary"
               initial={{ opacity: 0, y: 20 }}
@@ -140,16 +114,15 @@ export function Hero({ isDark }: HeroProps) {
         </AnimatePresence>
       </div>
 
-      {/* Mobile-only map */}
-      {showMap && (
+      {/* Mobile-only map (for route details) */}
+      {showRoute && (
         <div className="lg:hidden px-4 sm:px-6 py-6 bg-bg-primary">
           <div className="h-[200px] rounded-lg overflow-hidden shadow-lg border border-border">
             <MapPreview isDark={isDark} route={route} origin={originCoords} destination={destCoords} />
           </div>
         </div>
       )}
-      {/* Scroll indicator */}
-      <div className="h-12 bg-gradient-to-b from-transparent to-bg-primary relative z-10 pointer-events-auto" />
+
     </section>
   );
 }

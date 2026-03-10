@@ -26,7 +26,7 @@ const VEHICLE_RATES: Record<number, number> = {
   7: 5.50,
 };
 
-const INPUT_CLASS = 'w-full bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 rounded py-2.5 pl-3 pr-3 text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all text-sm';
+const INPUT_CLASS = 'w-full bg-black/5 dark:bg-white/5 border border-black/15 dark:border-white/10 rounded py-2.5 pl-3 pr-3 text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all text-sm';
 
 function extractCity(label: string): string {
   const parts = label.split(',');
@@ -77,7 +77,7 @@ function AddressInput({ label, placeholder, onSelect }: {
           onChange={(e) => { setText(e.target.value); setSelected(false); setIsOpen(true); }}
           onFocus={() => { if (!selected && suggestions.length > 0) setIsOpen(true); }}
           placeholder={placeholder}
-          className="w-full bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 rounded py-2.5 pl-10 pr-10 text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all text-sm"
+          className="w-full bg-black/5 dark:bg-white/5 border border-black/15 dark:border-white/10 rounded py-2.5 pl-10 pr-10 text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all text-sm"
         />
         {loading && <LoaderIcon className="absolute right-3 w-4 h-4 text-text-secondary animate-spin" />}
       </div>

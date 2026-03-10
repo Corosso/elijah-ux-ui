@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { RouteGeometry } from '../api/openrouteservice';
@@ -10,25 +10,76 @@ interface MapPreviewProps {
   destination?: { lat: number; lng: number } | null;
 }
 
+// Default: Medellín
+const DEFAULT_CENTER: [number, number] = [6.2442, -75.5812];
+const DEFAULT_ZOOM = 13;
+
 export function MapPreview({ isDark, route, origin, destination }: MapPreviewProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
   const routeLayerRef = useRef<L.LayerGroup | null>(null);
+  const [userCenter, setUserCenter] = useState<[number, number] | null>(null);
+  const geoAttemptedRef = useRef(false);
+
+  // Geolocation: try IP first, then browser
+  useEffect(() => {
+    if (geoAttemptedRef.current) return;
+    geoAttemptedRef.current = true;
+
+    // Attempt 1: IP-based geolocation
+    fetch('https://ipapi.co/json/')
+      .then((res) => {
+        if (!res.ok) throw new Error('IP geolocation failed');
+        return res.json();
+      })
+      .then((data) => {
+        if (data.latitude && data.longitude) {
+          setUserCenter([data.latitude, data.longitude]);
+        } else {
+          throw new Error('No coordinates in response');
+        }
+      })
+      .catch(() => {
+        // Attempt 2: Browser geolocation
+        if ('geolocation' in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              setUserCenter([position.coords.latitude, position.coords.longitude]);
+            },
+            () => {
+              // Fallback: Medellín
+              setUserCenter(DEFAULT_CENTER);
+            },
+            { timeout: 5000 }
+          );
+        } else {
+          setUserCenter(DEFAULT_CENTER);
+        }
+      });
+  }, []);
 
   // Initialize map
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
+    const center = userCenter || DEFAULT_CENTER;
     const map = L.map(mapContainerRef.current, {
-      center: [4.705, -74.051],
-      zoom: 13,
+      center,
+      zoom: DEFAULT_ZOOM,
       scrollWheelZoom: false,
       zoomControl: true,
       attributionControl: false,
     });
     mapInstanceRef.current = map;
     routeLayerRef.current = L.layerGroup().addTo(map);
-  }, []);
+  }, [userCenter]);
+
+  // Move map to user center once resolved
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !userCenter || route) return;
+    map.setView(userCenter, DEFAULT_ZOOM);
+  }, [userCenter, route]);
 
   // Update tiles on dark mode change
   useEffect(() => {
@@ -49,7 +100,6 @@ export function MapPreview({ isDark, route, origin, destination }: MapPreviewPro
     layerGroup.clearLayers();
 
     if (route && route.coordinates && origin && destination) {
-      // Convert ORS [lng, lat] to Leaflet [lat, lng]
       const latLngs: L.LatLngExpression[] = route.coordinates.map(([lng, lat]) => [lat, lng]);
 
       L.polyline(latLngs, {
@@ -76,13 +126,8 @@ export function MapPreview({ isDark, route, origin, destination }: MapPreviewPro
       L.marker([origin.lat, origin.lng], { icon: originIcon }).addTo(layerGroup);
       L.marker([destination.lat, destination.lng], { icon: destIcon }).addTo(layerGroup);
 
-      // Fit bounds to route
       const bounds = L.latLngBounds(latLngs);
-      // Extra right padding to keep route visible left of the booking form
       map.fitBounds(bounds, { paddingTopLeft: [50, 50], paddingBottomRight: [400, 50] });
-    } else {
-      // Default view: Bogota
-      map.setView([4.705, -74.051], 13);
     }
   }, [route, origin, destination]);
 
