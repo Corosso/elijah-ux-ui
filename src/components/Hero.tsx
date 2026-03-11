@@ -32,8 +32,8 @@ export function Hero({ isDark }: HeroProps) {
         {/* Map always visible as background */}
         <div className="absolute inset-0 z-0">
           <MapPreview isDark={isDark} route={route} origin={originCoords} destination={destCoords} />
-          {/* Gradient overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/30 pointer-events-none" />
+          {/* Subtle overlay only on the left side for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent pointer-events-none" />
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 pointer-events-none pt-20 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center py-10">
