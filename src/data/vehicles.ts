@@ -4,11 +4,17 @@ export const vehicles: Vehicle[] = [
   {
     id: 1,
     name: 'Mercedes-Benz S-Class',
-    category: 'First Class',
+    category: 'Luxury Sedan',
     description: 'Mercedes S550 or similar',
     passengers: 3,
     luggage: 3,
     image: '/flota/mercedes-s-class.png',
+    features: [
+      'Free 90 min wait time for airport pickups',
+      'Complimentary in-vehicle WiFi available',
+      'Complimentary bottled water',
+      'Free cancellation 24 hours before pickup',
+    ],
   },
   {
     id: 2,
@@ -18,6 +24,12 @@ export const vehicles: Vehicle[] = [
     passengers: 3,
     luggage: 3,
     image: '/flota/cadillac-xts.png',
+    features: [
+      'Free 60 min wait time for airport pickups',
+      'Complimentary in-vehicle WiFi available',
+      'Complimentary bottled water',
+      'Free cancellation 24 hours before pickup',
+    ],
   },
   {
     id: 3,
@@ -27,6 +39,13 @@ export const vehicles: Vehicle[] = [
     passengers: 6,
     luggage: 6,
     image: '/flota/cadillac-escalade.png',
+    popular: true,
+    features: [
+      'Free 90 min wait time for airport pickups',
+      'Complimentary in-vehicle WiFi available',
+      'Complimentary bottled water & snacks',
+      'Free cancellation 24 hours before pickup',
+    ],
   },
   {
     id: 4,
@@ -36,6 +55,12 @@ export const vehicles: Vehicle[] = [
     passengers: 6,
     luggage: 6,
     image: '/flota/chevy-suv.png',
+    features: [
+      'Free 60 min wait time for airport pickups',
+      'Complimentary in-vehicle WiFi available',
+      'Complimentary bottled water',
+      'Free cancellation 24 hours before pickup',
+    ],
   },
   {
     id: 5,
@@ -45,6 +70,12 @@ export const vehicles: Vehicle[] = [
     passengers: 4,
     luggage: 3,
     image: '/flota/tesla-model-x.png',
+    features: [
+      'Zero emissions luxury ride',
+      'Complimentary in-vehicle WiFi available',
+      'Complimentary bottled water',
+      'Free cancellation 24 hours before pickup',
+    ],
   },
   {
     id: 6,
@@ -54,6 +85,12 @@ export const vehicles: Vehicle[] = [
     passengers: 12,
     luggage: 12,
     image: '/flota/mercedes-sprinter.png',
+    features: [
+      'Perfect for group transfers',
+      'Complimentary in-vehicle WiFi available',
+      'Complimentary bottled water',
+      'Free cancellation 48 hours before pickup',
+    ],
   },
   {
     id: 7,
@@ -63,5 +100,11 @@ export const vehicles: Vehicle[] = [
     passengers: 8,
     luggage: 4,
     image: '/flota/lincoln-stretch-limousine.png',
+    features: [
+      'Premium bar & entertainment system',
+      'Complimentary champagne service',
+      'Privacy partition available',
+      'Free cancellation 48 hours before pickup',
+    ],
   },
 ];

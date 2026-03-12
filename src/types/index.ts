@@ -6,6 +6,8 @@ export interface Vehicle {
   passengers: number;
   luggage: number;
   image: string;
+  features?: string[];
+  popular?: boolean;
 }
 
 export interface Route {

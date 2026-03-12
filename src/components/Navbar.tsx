@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MoonIcon, SunIcon, MenuIcon, XIcon, UserIcon, LogOutIcon, MailIcon, LockKeyholeIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
+import { MoonIcon, SunIcon, MenuIcon, XIcon, UserIcon, LogOutIcon, MailIcon, LockKeyholeIcon, EyeIcon, EyeOffIcon, PhoneIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { navLinks } from '../data';
 
@@ -45,17 +45,14 @@ export function Navbar({ isDark, toggleDark, user, onLogin, onLogout }: NavbarPr
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            <div className="flex gap-6">
-              {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  className={`text-sm font-medium hover:text-gold transition-colors ${isScrolled ? "text-text-secondary" : "text-white/90"}`}
-                >
-                  {link.name}
-                </a>
-              ))}
-            </div>
+
+            <a
+              href="tel:+573001234567"
+              className={`flex items-center gap-1.5 text-sm font-medium hover:text-gold transition-colors ${isScrolled ? 'text-text-secondary' : 'text-white/90'}`}
+            >
+              <PhoneIcon className="w-3.5 h-3.5" />
+              +57 300 123 4567
+            </a>
 
             <div className="h-4 w-px bg-border" />
 
