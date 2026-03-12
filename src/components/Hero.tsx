@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { BookingForm } from './BookingForm';
 import { MapPreview } from './MapPreview';
-import type { RouteGeometry } from '../api/openrouteservice';
+import type { RouteGeometry } from '../api/googleMaps';
 
 interface HeroProps {
   isDark: boolean;

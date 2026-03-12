@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import type { RouteGeometry } from '../api/openrouteservice';
+import type { RouteGeometry } from '../api/googleMaps';
 
 interface MapPreviewProps {
   isDark: boolean;

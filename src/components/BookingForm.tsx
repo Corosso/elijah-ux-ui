@@ -7,8 +7,8 @@ import {
   ClockIcon, StarIcon, ShieldCheckIcon, PhoneIcon, MessageCircleIcon,
   XIcon, CreditCardIcon, LockIcon, ArrowLeftIcon, CheckIcon,
 } from 'lucide-react';
-import { geocodeAutocomplete, getDirections } from '../api/openrouteservice';
-import type { GeocodeSuggestion, RouteGeometry } from '../api/openrouteservice';
+import { geocodeAutocomplete, getDirections } from '../api/googleMaps';
+import type { GeocodeSuggestion, RouteGeometry } from '../api/googleMaps';
 import { useDebounce } from '../hooks/useDebounce';
 import { vehicles } from '../data/vehicles';
 import { calculatePrice } from '../utils/pricing';

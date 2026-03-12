@@ -20,7 +20,7 @@ export const legalContent = {
   cookies: [
     { heading: '1. What Are Cookies', body: 'Cookies are small text files stored on your device when you visit our website. They help us provide a better user experience by remembering your preferences and settings.' },
     { heading: '2. Cookies We Use', body: 'We use essential cookies (required for site functionality), preference cookies (to remember your settings like dark mode), and analytics cookies (to understand how our site is used).' },
-    { heading: '3. Third-Party Cookies', body: 'Our mapping services (OpenRouteService, CartoDB) may set their own cookies. Payment processors may also use cookies during the checkout process.' },
+    { heading: '3. Third-Party Cookies', body: 'Our mapping services (Google Maps, CartoDB) may set their own cookies. Payment processors may also use cookies during the checkout process.' },
     { heading: '4. Managing Cookies', body: 'You can control cookies through your browser settings. Disabling essential cookies may affect site functionality. Preference cookies can be declined without impact to core services.' },
   ],
 };
