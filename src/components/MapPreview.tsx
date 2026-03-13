@@ -8,13 +8,15 @@ interface MapPreviewProps {
   route?: RouteGeometry | null;
   origin?: { lat: number; lng: number } | null;
   destination?: { lat: number; lng: number } | null;
+  /** Height of the form area on mobile, so fitBounds pushes the route below it */
+  topOffset?: number;
 }
 
 // Default: Medellín
 const DEFAULT_CENTER: [number, number] = [6.2442, -75.5812];
 const DEFAULT_ZOOM = 13;
 
-export function MapPreview({ isDark, route, origin, destination }: MapPreviewProps) {
+export function MapPreview({ isDark, route, origin, destination, topOffset = 0 }: MapPreviewProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
@@ -99,6 +101,9 @@ export function MapPreview({ isDark, route, origin, destination }: MapPreviewPro
     if (!map || !layerGroup) return;
     layerGroup.clearLayers();
 
+    // Leaflet needs a size recalc when container dimensions change
+    map.invalidateSize();
+
     if (route && route.coordinates && origin && destination) {
       const latLngs: L.LatLngExpression[] = route.coordinates.map(([lng, lat]) => [lat, lng]);
 
@@ -127,9 +132,13 @@ export function MapPreview({ isDark, route, origin, destination }: MapPreviewPro
       L.marker([destination.lat, destination.lng], { icon: destIcon }).addTo(layerGroup);
 
       const bounds = L.latLngBounds(latLngs);
-      map.fitBounds(bounds, { paddingTopLeft: [50, 50], paddingBottomRight: [400, 50] });
+      const isMobile = window.innerWidth < 1024;
+      map.fitBounds(bounds, isMobile
+        ? { paddingTopLeft: [20, topOffset + 20], paddingBottomRight: [20, 30] }
+        : { paddingTopLeft: [50, 50], paddingBottomRight: [420, 50] }
+      );
     }
-  }, [route, origin, destination]);
+  }, [route, origin, destination, topOffset]);
 
   // Cleanup
   useEffect(() => {

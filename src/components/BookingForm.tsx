@@ -154,17 +154,17 @@ function OverlayPortal({ step, onClose, children }: {
       className="fixed inset-0 z-[9999] bg-bg-primary overflow-y-auto"
     >
       <div className="sticky top-0 z-10 bg-bg-primary/95 backdrop-blur-md border-b border-border">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <span className="font-serif text-xl tracking-[0.2em] uppercase text-gold">ELIJAH</span>
-            <button onClick={onClose} className="p-2 rounded-full hover:bg-bg-elevated transition-colors text-text-secondary" aria-label="Close">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <span className="font-serif text-lg sm:text-xl tracking-[0.2em] uppercase text-gold">ELIJAH</span>
+            <button onClick={onClose} className="p-1.5 sm:p-2 rounded-full hover:bg-bg-elevated transition-colors text-text-secondary" aria-label="Close">
               <XIcon className="w-5 h-5" />
             </button>
           </div>
           <StepProgress current={step} />
         </div>
       </div>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 py-5 sm:py-8">
         {children}
       </div>
     </motion.div>,
@@ -186,26 +186,26 @@ function RouteSummary({ origin, destination, date, time, vehicleName, onEdit }: 
   const tmFmt = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-8 pb-6 border-b border-border">
+    <div className="flex flex-wrap items-center gap-x-4 sm:gap-x-6 gap-y-1.5 mb-5 sm:mb-8 pb-4 sm:pb-6 border-b border-border">
       <div>
-        <span className="text-[10px] font-semibold text-gold uppercase tracking-widest block mb-1">Pickup Location</span>
-        <span className="text-sm text-text-primary font-medium">{origin}</span>
+        <span className="text-[9px] sm:text-[10px] font-semibold text-gold uppercase tracking-widest block mb-0.5">Pickup</span>
+        <span className="text-xs sm:text-sm text-text-primary font-medium">{origin}</span>
       </div>
       <div>
-        <span className="text-[10px] font-semibold text-gold uppercase tracking-widest block mb-1">Destination</span>
-        <span className="text-sm text-text-primary font-medium">{destination}</span>
+        <span className="text-[9px] sm:text-[10px] font-semibold text-gold uppercase tracking-widest block mb-0.5">Destination</span>
+        <span className="text-xs sm:text-sm text-text-primary font-medium">{destination}</span>
       </div>
       <div>
-        <span className="text-[10px] font-semibold text-gold uppercase tracking-widest block mb-1">Date & Time</span>
-        <span className="text-sm text-text-primary font-medium">{fmt} {tmFmt}</span>
+        <span className="text-[9px] sm:text-[10px] font-semibold text-gold uppercase tracking-widest block mb-0.5">Date & Time</span>
+        <span className="text-xs sm:text-sm text-text-primary font-medium">{fmt} {tmFmt}</span>
       </div>
       {vehicleName && (
         <div>
-          <span className="text-[10px] font-semibold text-gold uppercase tracking-widest block mb-1">Car Type</span>
-          <span className="text-sm text-text-primary font-medium">{vehicleName}</span>
+          <span className="text-[9px] sm:text-[10px] font-semibold text-gold uppercase tracking-widest block mb-0.5">Car Type</span>
+          <span className="text-xs sm:text-sm text-text-primary font-medium">{vehicleName}</span>
         </div>
       )}
-      <button onClick={onEdit} className="ml-auto text-sm font-semibold text-gold hover:text-gold-hover transition-colors uppercase tracking-wider">EDIT</button>
+      <button onClick={onEdit} className="ml-auto text-xs sm:text-sm font-semibold text-gold hover:text-gold-hover transition-colors uppercase tracking-wider">EDIT</button>
     </div>
   );
 }
@@ -271,54 +271,54 @@ function VehicleCard({ vehicle, breakdown, onSelect }: {
   const priceParts = price.toFixed(2).split('.');
 
   return (
-    <div className="border-b border-border pb-8 last:border-b-0 last:pb-0">
+    <div className="border-b border-border pb-5 sm:pb-8 last:border-b-0 last:pb-0">
       {/* Popular badge */}
       {vehicle.popular && (
-        <div className="flex items-center gap-1.5 mb-4">
-          <StarIcon className="w-3.5 h-3.5 text-gold fill-gold" />
-          <span className="text-xs font-semibold text-gold uppercase tracking-wider">Most Popular</span>
+        <div className="flex items-center gap-1.5 mb-3 sm:mb-4">
+          <StarIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gold fill-gold" />
+          <span className="text-[10px] sm:text-xs font-semibold text-gold uppercase tracking-wider">Most Popular</span>
         </div>
       )}
 
       {/* Mobile: stacked layout */}
-      <div className="flex flex-col lg:flex-row lg:items-start gap-5 lg:gap-8">
+      <div className="flex flex-col lg:flex-row lg:items-start gap-3 sm:gap-5 lg:gap-8">
         {/* Vehicle Image */}
         <div className="flex justify-center lg:justify-start lg:w-[220px] flex-shrink-0">
           <img
             src={vehicle.image}
             alt={vehicle.name}
-            className="w-full max-w-[280px] sm:max-w-[240px] lg:max-w-[200px] h-auto object-contain dark:drop-shadow-[0_0_20px_rgba(200,170,110,0.25)]"
+            className="w-full max-w-[200px] sm:max-w-[240px] lg:max-w-[200px] h-auto object-contain dark:drop-shadow-[0_0_20px_rgba(200,170,110,0.25)]"
           />
         </div>
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-xl font-bold text-text-primary">{vehicle.category}</h3>
-          <p className="text-sm text-text-secondary mt-0.5">{vehicle.description}</p>
+          <h3 className="text-lg sm:text-xl font-bold text-text-primary">{vehicle.category}</h3>
+          <p className="text-xs sm:text-sm text-text-secondary mt-0.5">{vehicle.description}</p>
 
           {/* Price — prominent on mobile */}
-          <div className="mt-3 lg:hidden">
+          <div className="mt-2 sm:mt-3 lg:hidden">
             <div className="flex items-baseline gap-0.5">
-              <span className="text-3xl font-bold text-text-primary">${priceParts[0]}</span>
-              <span className="text-lg font-bold text-text-primary">.{priceParts[1]}</span>
-              <span className="text-sm text-text-secondary ml-1.5">USD</span>
+              <span className="text-2xl sm:text-3xl font-bold text-text-primary">${priceParts[0]}</span>
+              <span className="text-base sm:text-lg font-bold text-text-primary">.{priceParts[1]}</span>
+              <span className="text-xs sm:text-sm text-text-secondary ml-1.5">USD</span>
             </div>
             <div className="flex items-center gap-1.5 mt-1">
-              <ShieldCheckIcon className="w-3.5 h-3.5 text-green-500" />
-              <span className="text-xs text-text-secondary">Price includes taxes, tolls & tip.</span>
+              <ShieldCheckIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-green-500" />
+              <span className="text-[10px] sm:text-xs text-text-secondary">Price includes taxes, tolls & tip.</span>
             </div>
-            <p className="text-[10px] text-text-secondary/50 mt-0.5">No hidden costs.</p>
+            <p className="text-[9px] sm:text-[10px] text-text-secondary/50 mt-0.5">No hidden costs.</p>
           </div>
 
           {/* Features */}
           {vehicle.features && (
-            <ul className="mt-4 space-y-2">
+            <ul className="mt-3 sm:mt-4 space-y-1.5 sm:space-y-2">
               {vehicle.features.map((feat, i) => (
-                <li key={i} className="flex items-start gap-2.5 text-sm text-text-secondary">
-                  {feat.toLowerCase().includes('wifi') ? <WifiIcon className="w-4 h-4 mt-0.5 flex-shrink-0" /> :
-                   feat.toLowerCase().includes('water') || feat.toLowerCase().includes('champagne') || feat.toLowerCase().includes('snack') ? <CoffeeIcon className="w-4 h-4 mt-0.5 flex-shrink-0" /> :
-                   feat.toLowerCase().includes('cancellation') ? <XCircleIcon className="w-4 h-4 mt-0.5 flex-shrink-0" /> :
-                   <ClockIcon className="w-4 h-4 mt-0.5 flex-shrink-0" />}
+                <li key={i} className="flex items-start gap-2 text-xs sm:text-sm text-text-secondary">
+                  {feat.toLowerCase().includes('wifi') ? <WifiIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0" /> :
+                   feat.toLowerCase().includes('water') || feat.toLowerCase().includes('champagne') || feat.toLowerCase().includes('snack') ? <CoffeeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0" /> :
+                   feat.toLowerCase().includes('cancellation') ? <XCircleIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0" /> :
+                   <ClockIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0" />}
                   <span>{feat}</span>
                 </li>
               ))}
@@ -345,19 +345,19 @@ function VehicleCard({ vehicle, breakdown, onSelect }: {
           )}
 
           {/* Capacity */}
-          <div className="flex items-center gap-5 mt-4 text-text-secondary">
+          <div className="flex items-center gap-4 sm:gap-5 mt-3 sm:mt-4 text-text-secondary">
             <div className="flex items-center gap-1.5">
-              <UsersIcon className="w-4 h-4" /><span className="text-sm">max. {vehicle.passengers}</span>
+              <UsersIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" /><span className="text-xs sm:text-sm">max. {vehicle.passengers}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <BriefcaseIcon className="w-4 h-4" /><span className="text-sm">max. {vehicle.luggage}</span>
+              <BriefcaseIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" /><span className="text-xs sm:text-sm">max. {vehicle.luggage}</span>
             </div>
           </div>
 
           {/* Mobile SELECT */}
           <button
             onClick={() => onSelect(vehicle.name, price)}
-            className="mt-5 w-full py-3.5 bg-gold hover:bg-gold-hover text-white font-bold rounded transition-colors uppercase tracking-wider text-sm lg:hidden"
+            className="mt-4 sm:mt-5 w-full py-3 sm:py-3.5 bg-gold hover:bg-gold-hover text-white font-bold rounded transition-colors uppercase tracking-wider text-xs sm:text-sm lg:hidden"
           >SELECT</button>
         </div>
 
@@ -398,9 +398,9 @@ function VehicleSelectionContent({ origin, destination, date, time, returnTrip, 
   return (
     <>
       <RouteSummary origin={extractCity(origin.label)} destination={extractCity(destination.label)} date={date} time={time} onEdit={onEdit} />
-      <div className="flex flex-col lg:flex-row gap-8">
-        <div className="flex-1 space-y-6">
-          <h2 className="text-xs font-semibold text-gold uppercase tracking-widest">Step 2 of 5 — Vehicle Class</h2>
+      <div className="flex flex-col lg:flex-row gap-5 sm:gap-8">
+        <div className="flex-1 space-y-4 sm:space-y-6">
+          <h2 className="text-[10px] sm:text-xs font-semibold text-gold uppercase tracking-widest">Step 2 of 5 — Vehicle Class</h2>
           {vehicles.map((v) => <VehicleCard key={v.id} vehicle={v} breakdown={getBreakdown(v.id)} onSelect={onSelect} />)}
         </div>
         <div className="lg:w-[280px] flex-shrink-0 space-y-4">
@@ -446,11 +446,11 @@ function LoginContent({ origin, destination, date, time, breakdown: _breakdown, 
   return (
     <>
       <RouteSummary origin={origin} destination={destination} date={date} time={time} onEdit={onEdit} />
-      <h2 className="text-xs font-semibold text-gold uppercase tracking-widest mb-6">Step 3 of 5 — Login</h2>
-      <div className="flex flex-col lg:flex-row gap-8">
+      <h2 className="text-[10px] sm:text-xs font-semibold text-gold uppercase tracking-widest mb-4 sm:mb-6">Step 3 of 5 — Login</h2>
+      <div className="flex flex-col lg:flex-row gap-5 sm:gap-8">
         {/* Continue as Guest */}
         <div className="flex-1">
-          <h3 className="text-lg font-bold text-text-primary mb-6">Continue as Guest</h3>
+          <h3 className="text-base sm:text-lg font-bold text-text-primary mb-4 sm:mb-6">Continue as Guest</h3>
           <div className="space-y-4 max-w-lg">
             <div>
               <label className="text-xs text-text-secondary mb-1 block">Email address *</label>
@@ -480,7 +480,7 @@ function LoginContent({ origin, destination, date, time, breakdown: _breakdown, 
 
         {/* Login / Create Account */}
         <div className="flex-1">
-          <h3 className="text-lg font-bold text-text-primary mb-6">Login or Create account</h3>
+          <h3 className="text-base sm:text-lg font-bold text-text-primary mb-4 sm:mb-6">Login or Create account</h3>
           <div className="space-y-4 max-w-lg">
             <div>
               <label className="text-xs text-text-secondary mb-1 block">Email address</label>
@@ -530,10 +530,10 @@ function BookingDetailsContent({ origin, destination, date, time, vehicleName, b
   return (
     <>
       <RouteSummary origin={origin} destination={destination} date={date} time={time} vehicleName={vehicleName} onEdit={onEdit} />
-      <h2 className="text-xs font-semibold text-gold uppercase tracking-widest mb-6">Step 4 of 5 — Booking Details</h2>
-      <div className="flex flex-col lg:flex-row gap-8">
+      <h2 className="text-[10px] sm:text-xs font-semibold text-gold uppercase tracking-widest mb-4 sm:mb-6">Step 4 of 5 — Booking Details</h2>
+      <div className="flex flex-col lg:flex-row gap-5 sm:gap-8">
         <div className="flex-1">
-          <h3 className="text-lg font-bold text-text-primary mb-6">Additional information (Optional)</h3>
+          <h3 className="text-base sm:text-lg font-bold text-text-primary mb-4 sm:mb-6">Additional information (Optional)</h3>
           <div className="space-y-5 max-w-xl">
             <div>
               <textarea
@@ -609,11 +609,11 @@ function PaymentContent({ origin, destination, date, time, vehicleName, breakdow
   return (
     <>
       <RouteSummary origin={origin} destination={destination} date={date} time={time} vehicleName={vehicleName} onEdit={onEdit} />
-      <h2 className="text-xs font-semibold text-gold uppercase tracking-widest mb-6">Step 5 of 5 — Payment Information</h2>
-      <div className="flex flex-col lg:flex-row gap-8">
+      <h2 className="text-[10px] sm:text-xs font-semibold text-gold uppercase tracking-widest mb-4 sm:mb-6">Step 5 of 5 — Payment Information</h2>
+      <div className="flex flex-col lg:flex-row gap-5 sm:gap-8">
         <div className="flex-1">
-          <h3 className="text-lg font-bold text-text-primary mb-2">Payment information</h3>
-          <p className="text-sm text-text-secondary mb-6">All transactions are secure and encrypted. Safe and secure payments powered by <strong>Stripe</strong>.</p>
+          <h3 className="text-base sm:text-lg font-bold text-text-primary mb-2">Payment information</h3>
+          <p className="text-xs sm:text-sm text-text-secondary mb-4 sm:mb-6">All transactions are secure and encrypted. Safe and secure payments powered by <strong>Stripe</strong>.</p>
 
           <div className="space-y-4 max-w-xl">
             <div>
@@ -750,9 +750,9 @@ export function BookingForm({ onRoutePreview }: BookingFormProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.4 }}
-        className="bg-bg-primary/90 dark:bg-bg-elevated/90 backdrop-blur-md rounded-lg shadow-xl border border-white/20 dark:border-white/10 overflow-hidden w-full max-w-md mx-auto relative z-10"
+        className="bg-bg-primary/90 dark:bg-bg-elevated/90 backdrop-blur-md rounded-lg shadow-xl border border-white/20 dark:border-white/10 overflow-hidden w-full max-w-sm sm:max-w-md mx-auto relative z-10"
       >
-        <div className="p-5 flex flex-col gap-4">
+        <div className="p-4 sm:p-5 flex flex-col gap-3 sm:gap-4">
           <AddressInput label="Origin" placeholder="Pickup address" onSelect={setOrigin} />
           <AddressInput label="Destination" placeholder="Destination address" onSelect={setDestination} />
           <div>
@@ -770,7 +770,7 @@ export function BookingForm({ onRoutePreview }: BookingFormProps) {
             <input type="checkbox" id="returnTrip" checked={returnTrip} onChange={(e) => setReturnTrip(e.target.checked)} className="w-4 h-4 rounded border-white/30 text-gold focus:ring-gold bg-white/10 checked:bg-gold accent-gold cursor-pointer" />
             <label htmlFor="returnTrip" className="text-sm text-text-secondary cursor-pointer">Add return trip</label>
           </div>
-          <button disabled={loadingRoute || !canSearch} onClick={handleGetPrices} className="w-full mt-2 py-3 bg-gold hover:bg-gold-hover text-white font-medium rounded-sm transition-colors flex items-center justify-center gap-2 group animate-shimmer disabled:opacity-60 disabled:cursor-not-allowed">
+          <button disabled={loadingRoute || !canSearch} onClick={handleGetPrices} className="w-full mt-1 sm:mt-2 py-2.5 sm:py-3 bg-gold hover:bg-gold-hover text-white text-sm font-medium rounded-sm transition-colors flex items-center justify-center gap-2 group animate-shimmer disabled:opacity-60 disabled:cursor-not-allowed">
             {loadingRoute ? (<><LoaderIcon className="w-4 h-4 animate-spin" /> Calculating...</>) : (<>GET PRICES <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></>)}
           </button>
         </div>
