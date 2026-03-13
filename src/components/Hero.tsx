@@ -12,8 +12,8 @@ export function Hero({ isDark }: HeroProps) {
   const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [destCoords, setDestCoords] = useState<{ lat: number; lng: number } | null>(null);
 
-  const handleRouteFound = useCallback(
-    (r: RouteGeometry, o: { lat: number; lng: number }, d: { lat: number; lng: number }) => {
+  const handleRoutePreview = useCallback(
+    (r: RouteGeometry | null, o: { lat: number; lng: number } | null, d: { lat: number; lng: number } | null) => {
       setRoute(r);
       setOriginCoords(o);
       setDestCoords(d);
@@ -34,7 +34,7 @@ export function Hero({ isDark }: HeroProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 pointer-events-none flex justify-end items-center py-10">
           {/* Booking Form - right side */}
           <div className="w-full max-w-md relative z-20 pointer-events-auto">
-            <BookingForm onRouteFound={handleRouteFound} />
+            <BookingForm onRoutePreview={handleRoutePreview} />
           </div>
         </div>
       </div>

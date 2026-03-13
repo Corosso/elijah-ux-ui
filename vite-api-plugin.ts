@@ -139,18 +139,31 @@ async function handleDirections(query: Record<string, string>, res: ServerRespon
   }
 
   try {
-    const dirRes = await fetch(
-      `https://maps.googleapis.com/maps/api/directions/json?origin=${originLat},${originLng}&destination=${destLat},${destLng}&mode=driving&key=${GOOGLE_KEY}`
-    );
-    const dirData = await dirRes.json();
+    const routeRes = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': GOOGLE_KEY,
+        'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline',
+      },
+      body: JSON.stringify({
+        origin: { location: { latLng: { latitude: parseFloat(originLat), longitude: parseFloat(originLng) } } },
+        destination: { location: { latLng: { latitude: parseFloat(destLat), longitude: parseFloat(destLng) } } },
+        travelMode: 'DRIVE',
+        routingPreference: 'TRAFFIC_AWARE',
+        units: 'METRIC',
+      }),
+    });
+    const routeData = await routeRes.json();
 
-    if (dirData.status !== 'OK' || !dirData.routes?.length) {
-      return sendJson(res, 200, { error: `Directions API: ${dirData.status}` });
+    if (!routeData.routes?.length) {
+      return sendJson(res, 200, { error: `Routes API: no routes found`, _debug: routeData });
     }
 
-    const route = dirData.routes[0];
-    const leg = route.legs[0];
-    const coordinates = decodePolyline(route.overview_polyline.points);
+    const route = routeData.routes[0];
+    const coordinates = decodePolyline(route.polyline.encodedPolyline);
+    const durationSeconds = parseInt(route.duration.replace('s', ''), 10);
+    const distanceMeters = route.distanceMeters;
 
     let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
     for (const [ln, lt] of coordinates) {
@@ -163,8 +176,8 @@ async function handleDirections(query: Record<string, string>, res: ServerRespon
     sendJson(res, 200, {
       coordinates,
       bbox: [minLng, minLat, maxLng, maxLat],
-      duration: leg.duration.value,
-      distance: leg.distance.value,
+      duration: durationSeconds,
+      distance: distanceMeters,
     });
   } catch (err: any) {
     console.error('[api] directions error:', err);

@@ -15,10 +15,10 @@ import { calculatePrice } from '../utils/pricing';
 import type { PricingBreakdown } from '../utils/pricing';
 
 interface BookingFormProps {
-  onRouteFound?: (
-    route: RouteGeometry,
-    origin: { lat: number; lng: number },
-    destination: { lat: number; lng: number }
+  onRoutePreview?: (
+    route: RouteGeometry | null,
+    origin: { lat: number; lng: number } | null,
+    destination: { lat: number; lng: number } | null
   ) => void;
 }
 
@@ -676,7 +676,7 @@ function PaymentContent({ origin, destination, date, time, vehicleName, breakdow
 
 /* =============== Main BookingForm =============== */
 
-export function BookingForm({ onRouteFound }: BookingFormProps) {
+export function BookingForm({ onRoutePreview }: BookingFormProps) {
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [origin, setOrigin] = useState<GeocodeSuggestion | null>(null);
   const [destination, setDestination] = useState<GeocodeSuggestion | null>(null);
@@ -692,17 +692,32 @@ export function BookingForm({ onRouteFound }: BookingFormProps) {
   const todayStr = new Date().toISOString().split('T')[0];
   const canSearch = origin !== null && destination !== null && selectedDate !== '' && selectedTime !== '';
 
-  const handleGetPrices = () => {
-    if (!origin || !destination || !onRouteFound) return;
+  // Fetch and preview route on map as soon as both points are selected
+  useEffect(() => {
+    if (!origin || !destination) {
+      // Clear route preview if a point is removed
+      if (routeResult) {
+        setRouteResult(null);
+        onRoutePreview?.(null, null, null);
+      }
+      return;
+    }
+    let cancelled = false;
     setLoadingRoute(true);
     getDirections({ lat: origin.lat, lng: origin.lng }, { lat: destination.lat, lng: destination.lng })
       .then((route) => {
-        onRouteFound(route, { lat: origin.lat, lng: origin.lng }, { lat: destination.lat, lng: destination.lng });
+        if (cancelled) return;
         setRouteResult(route);
-        setStep(2);
+        onRoutePreview?.(route, { lat: origin.lat, lng: origin.lng }, { lat: destination.lat, lng: destination.lng });
       })
-      .catch(console.error)
-      .finally(() => setLoadingRoute(false));
+      .catch((err) => { if (!cancelled) console.error(err); })
+      .finally(() => { if (!cancelled) setLoadingRoute(false); });
+    return () => { cancelled = true; };
+  }, [origin, destination]);
+
+  const handleGetPrices = () => {
+    if (!origin || !destination || !routeResult) return;
+    setStep(2);
   };
 
   const handleVehicleSelect = (vehicleName: string, price: number) => {

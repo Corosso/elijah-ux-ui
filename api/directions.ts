@@ -1,7 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-const GOOGLE_KEY = process.env.GOOGLE_MAPS_API_KEY || '';
-
 /** Decode a Google encoded polyline string into [lng, lat] pairs */
 function decodePolyline(encoded: string): [number, number][] {
   const points: [number, number][] = [];
@@ -33,7 +31,6 @@ function decodePolyline(encoded: string): [number, number][] {
 
     lng += result & 1 ? ~(result >> 1) : result >> 1;
 
-    // Return as [lng, lat] to match the existing RouteGeometry format
     points.push([lng / 1e5, lat / 1e5]);
   }
 
@@ -41,6 +38,8 @@ function decodePolyline(encoded: string): [number, number][] {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const GOOGLE_KEY = process.env.GOOGLE_MAPS_API_KEY || '';
+
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -52,29 +51,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const params = new URLSearchParams({
-      origin: `${originLat},${originLng}`,
-      destination: `${destLat},${destLng}`,
-      mode: 'driving',
-      key: GOOGLE_KEY,
+    const routeRes = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': GOOGLE_KEY,
+        'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline',
+      },
+      body: JSON.stringify({
+        origin: { location: { latLng: { latitude: parseFloat(String(originLat)), longitude: parseFloat(String(originLng)) } } },
+        destination: { location: { latLng: { latitude: parseFloat(String(destLat)), longitude: parseFloat(String(destLng)) } } },
+        travelMode: 'DRIVE',
+        routingPreference: 'TRAFFIC_AWARE',
+        units: 'METRIC',
+      }),
     });
+    const routeData = await routeRes.json();
 
-    const dirRes = await fetch(
-      `https://maps.googleapis.com/maps/api/directions/json?${params}`
-    );
-    const dirData = await dirRes.json();
-
-    if (dirData.status !== 'OK' || !dirData.routes?.length) {
-      return res.status(200).json({ error: `Directions API returned: ${dirData.status}` });
+    if (!routeData.routes?.length) {
+      return res.status(200).json({ error: 'Routes API: no routes found' });
     }
 
-    const route = dirData.routes[0];
-    const leg = route.legs[0];
+    const route = routeData.routes[0];
+    const coordinates = decodePolyline(route.polyline.encodedPolyline);
+    const durationSeconds = parseInt(route.duration.replace('s', ''), 10);
+    const distanceMeters = route.distanceMeters;
 
-    // Decode the overview polyline
-    const coordinates = decodePolyline(route.overview_polyline.points);
-
-    // Compute bounding box from coordinates
     let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
     for (const [ln, lt] of coordinates) {
       if (ln < minLng) minLng = ln;
@@ -86,8 +88,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({
       coordinates,
       bbox: [minLng, minLat, maxLng, maxLat],
-      duration: leg.duration.value,   // seconds
-      distance: leg.distance.value,   // meters
+      duration: durationSeconds,
+      distance: distanceMeters,
     });
   } catch (err) {
     console.error('Directions error:', err);
