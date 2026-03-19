@@ -17,8 +17,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 1. Places Autocomplete (New API)
     const body: Record<string, unknown> = {
       input,
-      includedRegionCodes: ['co'],
-      languageCode: 'es',
+      includedRegionCodes: ['co', 'us'],
+      languageCode: 'en',
     };
 
     if (lat && lng) {

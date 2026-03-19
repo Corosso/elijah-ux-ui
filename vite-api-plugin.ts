@@ -65,8 +65,8 @@ async function handlePlacesAutocomplete(query: Record<string, string>, res: Serv
     // 1. Places Autocomplete (New API)
     const body: Record<string, unknown> = {
       input,
-      includedRegionCodes: ['co'],
-      languageCode: 'es',
+      includedRegionCodes: ['co', 'us'],
+      languageCode: 'en',
     };
 
     if (lat && lng) {

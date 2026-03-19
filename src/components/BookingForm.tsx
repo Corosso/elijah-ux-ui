@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -22,7 +22,6 @@ interface BookingFormProps {
   ) => void;
 }
 
-const COLOMBIA_CENTER = { lat: 4.65, lng: -74.05 };
 
 const INPUT_CLASS = 'w-full bg-black/5 dark:bg-white/5 border border-black/15 dark:border-white/10 rounded py-2.5 pl-3 pr-3 text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all text-sm';
 const PAGE_INPUT = 'w-full border border-border rounded-lg py-3 px-4 text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all text-sm bg-bg-primary dark:bg-bg-elevated';
@@ -51,7 +50,7 @@ function AddressInput({ label, placeholder, onSelect }: {
     if (!debouncedText || debouncedText.length < 3) { setSuggestions([]); return; }
     let cancelled = false;
     setLoading(true);
-    geocodeAutocomplete(debouncedText, COLOMBIA_CENTER)
+    geocodeAutocomplete(debouncedText)
       .then((r) => { if (!cancelled) { setSuggestions(r); setIsOpen(r.length > 0); } })
       .catch(() => { if (!cancelled) setSuggestions([]); })
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -265,21 +264,13 @@ function PriceSidebar({ breakdown, buttonLabel, onAction }: {
 function VehicleCard({ vehicle, breakdown, onSelect }: {
   vehicle: typeof vehicles[0];
   breakdown: PricingBreakdown | null;
-  onSelect: (name: string, price: number) => void;
+  onSelect: (name: string, breakdown: PricingBreakdown) => void;
 }) {
   const price = breakdown?.total ?? 0;
   const priceParts = price.toFixed(2).split('.');
 
   return (
     <div className="border-b border-border pb-5 sm:pb-8 last:border-b-0 last:pb-0">
-      {/* Popular badge */}
-      {vehicle.popular && (
-        <div className="flex items-center gap-1.5 mb-3 sm:mb-4">
-          <StarIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gold fill-gold" />
-          <span className="text-[10px] sm:text-xs font-semibold text-gold uppercase tracking-wider">Most Popular</span>
-        </div>
-      )}
-
       {/* Mobile: stacked layout */}
       <div className="flex flex-col lg:flex-row lg:items-start gap-3 sm:gap-5 lg:gap-8">
         {/* Vehicle Image */}
@@ -326,23 +317,6 @@ function VehicleCard({ vehicle, breakdown, onSelect }: {
           )}
 
           {/* Pricing tags */}
-          {breakdown && (
-            <div className="flex flex-wrap gap-1.5 mt-3">
-              {breakdown.timeMultiplierValue !== 1.0 && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/10 text-gold font-medium">
-                  {breakdown.timeMultiplierLabel} {breakdown.timeMultiplierValue > 1 ? `+${Math.round((breakdown.timeMultiplierValue - 1) * 100)}%` : `${Math.round((1 - breakdown.timeMultiplierValue) * 100)}% off`}
-                </span>
-              )}
-              {breakdown.dayMultiplierValue !== 1.0 && (
-                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${breakdown.dayMultiplierValue > 1 ? 'bg-orange-500/10 text-orange-400' : 'bg-green-500/10 text-green-400'}`}>
-                  {breakdown.dayMultiplierLabel} {breakdown.dayMultiplierValue > 1 ? `+${Math.round((breakdown.dayMultiplierValue - 1) * 100)}%` : `${Math.round((1 - breakdown.dayMultiplierValue) * 100)}% off`}
-                </span>
-              )}
-              {breakdown.advanceDiscount > 0 && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 font-medium">Early booking -{Math.round(breakdown.advanceDiscount * 100)}%</span>
-              )}
-            </div>
-          )}
 
           {/* Capacity */}
           <div className="flex items-center gap-4 sm:gap-5 mt-3 sm:mt-4 text-text-secondary">
@@ -356,7 +330,7 @@ function VehicleCard({ vehicle, breakdown, onSelect }: {
 
           {/* Mobile SELECT */}
           <button
-            onClick={() => onSelect(vehicle.name, price)}
+            onClick={() => breakdown && onSelect(vehicle.name, breakdown)}
             className="mt-4 sm:mt-5 w-full py-3 sm:py-3.5 bg-gold hover:bg-gold-hover text-white font-bold rounded transition-colors uppercase tracking-wider text-xs sm:text-sm lg:hidden"
           >SELECT</button>
         </div>
@@ -376,7 +350,7 @@ function VehicleCard({ vehicle, breakdown, onSelect }: {
             <p className="text-[10px] text-text-secondary/60 mt-0.5">No hidden costs.</p>
           </div>
           <button
-            onClick={() => onSelect(vehicle.name, price)}
+            onClick={() => breakdown && onSelect(vehicle.name, breakdown)}
             className="mt-4 w-full px-6 py-3 bg-gold hover:bg-gold-hover text-white font-bold rounded transition-colors uppercase tracking-wider text-sm"
           >SELECT</button>
         </div>
@@ -389,11 +363,12 @@ function VehicleCard({ vehicle, breakdown, onSelect }: {
 function VehicleSelectionContent({ origin, destination, date, time, returnTrip, routeResult, onEdit, onSelect }: {
   origin: GeocodeSuggestion; destination: GeocodeSuggestion; date: string; time: string;
   returnTrip: boolean; routeResult: RouteGeometry;
-  onEdit: () => void; onSelect: (name: string, price: number) => void;
+  onEdit: () => void; onSelect: (name: string, breakdown: PricingBreakdown) => void;
 }) {
-  const getBreakdown = (vehicleId: number): PricingBreakdown | null => {
-    return calculatePrice({ distanceKm: routeResult.distance / 1000, durationMin: routeResult.duration / 60, vehicleId, date, time, returnTrip });
-  };
+  const breakdowns = useMemo(
+    () => Object.fromEntries(vehicles.map(v => [v.id, calculatePrice({ distanceKm: routeResult.distance / 1000, vehicleId: v.id, returnTrip, pickupLat: origin.lat, pickupLng: origin.lng })])),
+    [routeResult.distance, returnTrip, origin.lat, origin.lng],
+  );
 
   return (
     <>
@@ -401,7 +376,7 @@ function VehicleSelectionContent({ origin, destination, date, time, returnTrip, 
       <div className="flex flex-col lg:flex-row gap-5 sm:gap-8">
         <div className="flex-1 space-y-4 sm:space-y-6">
           <h2 className="text-[10px] sm:text-xs font-semibold text-gold uppercase tracking-widest">Step 2 of 5 — Vehicle Class</h2>
-          {vehicles.map((v) => <VehicleCard key={v.id} vehicle={v} breakdown={getBreakdown(v.id)} onSelect={onSelect} />)}
+          {vehicles.map((v) => <VehicleCard key={v.id} vehicle={v} breakdown={breakdowns[v.id]} onSelect={onSelect} />)}
         </div>
         <div className="lg:w-[280px] flex-shrink-0 space-y-4">
           <div className="border border-border rounded-lg p-5 bg-bg-primary dark:bg-bg-elevated">
@@ -686,7 +661,6 @@ export function BookingForm({ onRoutePreview }: BookingFormProps) {
   const [returnTrip, setReturnTrip] = useState(false);
   const [routeResult, setRouteResult] = useState<RouteGeometry | null>(null);
   const [selectedVehicleName, setSelectedVehicleName] = useState('');
-  const [selectedVehiclePrice, setSelectedVehiclePrice] = useState(0);
   const [selectedBreakdown, setSelectedBreakdown] = useState<PricingBreakdown | null>(null);
 
   const todayStr = new Date().toISOString().split('T')[0];
@@ -720,22 +694,16 @@ export function BookingForm({ onRoutePreview }: BookingFormProps) {
     setStep(2);
   };
 
-  const handleVehicleSelect = (vehicleName: string, price: number) => {
+  const handleVehicleSelect = (vehicleName: string, breakdown: PricingBreakdown) => {
     setSelectedVehicleName(vehicleName);
-    setSelectedVehiclePrice(price);
-    // Find the matching vehicle and compute breakdown
-    const vehicle = vehicles.find((v) => v.name === vehicleName || v.category === vehicleName);
-    if (vehicle && routeResult) {
-      const bd = calculatePrice({ distanceKm: routeResult.distance / 1000, durationMin: routeResult.duration / 60, vehicleId: vehicle.id, date: selectedDate, time: selectedTime, returnTrip });
-      setSelectedBreakdown(bd);
-    }
+    setSelectedBreakdown(breakdown);
     setStep(3);
   };
 
   const handleLoginContinue = () => { setStep(4); };
   const handleDetailsContinue = () => { setStep(5); };
   const handleBook = () => {
-    alert(`Booking confirmed!\n\n${selectedVehicleName}\n$${selectedVehiclePrice.toFixed(2)} USD\n\nPayment integration coming soon.`);
+    alert(`Booking confirmed!\n\n${selectedVehicleName}\n$${selectedBreakdown?.total.toFixed(2)} USD\n\nPayment integration coming soon.`);
     setStep(1);
   };
   const handleEdit = () => { setStep(1); };
