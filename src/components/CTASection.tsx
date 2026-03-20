@@ -2,7 +2,8 @@ import { motion } from 'framer-motion';
 
 export function CTASection() {
   return (
-    <section className="relative pt-52 pb-32 md:pt-56 md:pb-40 overflow-hidden -mt-20 [clip-path:polygon(0_5rem,100%_0,100%_100%,0_100%)]">
+    <section className="relative pt-[calc(5vw+2rem)] pb-20 md:pt-[calc(5vw+3rem)] md:pb-24 overflow-hidden -mt-[5vw] [clip-path:polygon(0_5vw,100%_0,100%_100%,0_100%)]">
+      {/* CTA is the last section, no need for extra pb */}
       <div className="absolute inset-0 bg-[#0A0A0A] z-0" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gold/20 via-transparent to-transparent opacity-50" />
 

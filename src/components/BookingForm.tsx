@@ -4,15 +4,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   MapPinIcon, ArrowRightIcon, LoaderIcon, UsersIcon, BriefcaseIcon,
   CheckCircleIcon, CircleIcon, WifiIcon, CoffeeIcon, XCircleIcon,
-  ClockIcon, StarIcon, ShieldCheckIcon, PhoneIcon, MessageCircleIcon,
+  ClockIcon, ShieldCheckIcon, PhoneIcon, MessageCircleIcon,
   XIcon, CreditCardIcon, LockIcon, ArrowLeftIcon, CheckIcon,
 } from 'lucide-react';
 import { geocodeAutocomplete, getDirections } from '../api/googleMaps';
 import type { GeocodeSuggestion, RouteGeometry } from '../api/googleMaps';
 import { useDebounce } from '../hooks/useDebounce';
 import { vehicles } from '../data/vehicles';
-import { calculatePrice } from '../utils/pricing';
-import type { PricingBreakdown } from '../utils/pricing';
+import { calculatePrice, HOURLY_MIN, HOURLY_MAX } from '../utils/pricing';
+import type { PricingBreakdown, ServiceMode } from '../utils/pricing';
+import { DateTimePicker } from './DateTimePicker';
 
 interface BookingFormProps {
   onRoutePreview?: (
@@ -360,19 +361,28 @@ function VehicleCard({ vehicle, breakdown, onSelect }: {
 }
 
 /* =============== Step 2: Vehicle Selection Content =============== */
-function VehicleSelectionContent({ origin, destination, date, time, returnTrip, routeResult, onEdit, onSelect }: {
-  origin: GeocodeSuggestion; destination: GeocodeSuggestion; date: string; time: string;
-  returnTrip: boolean; routeResult: RouteGeometry;
+function VehicleSelectionContent({ origin, destination, date, time, serviceMode, returnTrip, routeResult, hours, onEdit, onSelect }: {
+  origin: GeocodeSuggestion; destination: GeocodeSuggestion | null; date: string; time: string;
+  serviceMode: ServiceMode; returnTrip: boolean; routeResult: RouteGeometry | null; hours: number;
   onEdit: () => void; onSelect: (name: string, breakdown: PricingBreakdown) => void;
 }) {
   const breakdowns = useMemo(
-    () => Object.fromEntries(vehicles.map(v => [v.id, calculatePrice({ distanceKm: routeResult.distance / 1000, vehicleId: v.id, returnTrip, pickupLat: origin.lat, pickupLng: origin.lng })])),
-    [routeResult.distance, returnTrip, origin.lat, origin.lng],
+    () => Object.fromEntries(vehicles.map(v => [v.id,
+      serviceMode === 'hourly'
+        ? calculatePrice({ mode: 'hourly', hours, vehicleId: v.id, pickupLat: origin.lat, pickupLng: origin.lng })
+        : calculatePrice({ mode: 'point-to-point', distanceKm: (routeResult?.distance ?? 0) / 1000, vehicleId: v.id, returnTrip, pickupLat: origin.lat, pickupLng: origin.lng }),
+    ])),
+    [serviceMode, hours, routeResult?.distance, returnTrip, origin.lat, origin.lng],
   );
+
+  const originLabel = extractCity(origin.label);
+  const destLabel = serviceMode === 'hourly'
+    ? `${hours} hour${hours !== 1 ? 's' : ''} — By the Hour`
+    : extractCity(destination?.label ?? '');
 
   return (
     <>
-      <RouteSummary origin={extractCity(origin.label)} destination={extractCity(destination.label)} date={date} time={time} onEdit={onEdit} />
+      <RouteSummary origin={originLabel} destination={destLabel} date={date} time={time} onEdit={onEdit} />
       <div className="flex flex-col lg:flex-row gap-5 sm:gap-8">
         <div className="flex-1 space-y-4 sm:space-y-6">
           <h2 className="text-[10px] sm:text-xs font-semibold text-gold uppercase tracking-widest">Step 2 of 5 — Vehicle Class</h2>
@@ -653,23 +663,27 @@ function PaymentContent({ origin, destination, date, time, vehicleName, breakdow
 
 export function BookingForm({ onRoutePreview }: BookingFormProps) {
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [serviceMode, setServiceMode] = useState<ServiceMode>('point-to-point');
   const [origin, setOrigin] = useState<GeocodeSuggestion | null>(null);
   const [destination, setDestination] = useState<GeocodeSuggestion | null>(null);
   const [loadingRoute, setLoadingRoute] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [returnTrip, setReturnTrip] = useState(false);
+  const [selectedHours, setSelectedHours] = useState(HOURLY_MIN);
   const [routeResult, setRouteResult] = useState<RouteGeometry | null>(null);
   const [selectedVehicleName, setSelectedVehicleName] = useState('');
   const [selectedBreakdown, setSelectedBreakdown] = useState<PricingBreakdown | null>(null);
 
+  const isHourly = serviceMode === 'hourly';
   const todayStr = new Date().toISOString().split('T')[0];
-  const canSearch = origin !== null && destination !== null && selectedDate !== '' && selectedTime !== '';
+  const canSearch = isHourly
+    ? origin !== null && selectedDate !== '' && selectedTime !== ''
+    : origin !== null && destination !== null && selectedDate !== '' && selectedTime !== '';
 
   // Fetch and preview route on map as soon as both points are selected
   useEffect(() => {
-    if (!origin || !destination) {
-      // Clear route preview if a point is removed
+    if (!origin || !destination || isHourly) {
       if (routeResult) {
         setRouteResult(null);
         onRoutePreview?.(null, null, null);
@@ -687,10 +701,11 @@ export function BookingForm({ onRoutePreview }: BookingFormProps) {
       .catch((err) => { if (!cancelled) console.error(err); })
       .finally(() => { if (!cancelled) setLoadingRoute(false); });
     return () => { cancelled = true; };
-  }, [origin, destination]);
+  }, [origin, destination, isHourly]);
 
   const handleGetPrices = () => {
-    if (!origin || !destination || !routeResult) return;
+    if (!origin) return;
+    if (!isHourly && (!destination || !routeResult)) return;
     setStep(2);
   };
 
@@ -709,7 +724,9 @@ export function BookingForm({ onRoutePreview }: BookingFormProps) {
   const handleEdit = () => { setStep(1); };
 
   const originCity = origin ? extractCity(origin.label) : '';
-  const destCity = destination ? extractCity(destination.label) : '';
+  const destCity = isHourly
+    ? `${selectedHours} hour${selectedHours !== 1 ? 's' : ''} — By the Hour`
+    : destination ? extractCity(destination.label) : '';
 
   return (
     <>
@@ -721,23 +738,61 @@ export function BookingForm({ onRoutePreview }: BookingFormProps) {
         className="bg-bg-primary/90 dark:bg-bg-elevated/90 backdrop-blur-md rounded-lg shadow-xl border border-white/20 dark:border-white/10 overflow-hidden w-full max-w-sm sm:max-w-md mx-auto relative z-10"
       >
         <div className="p-4 sm:p-5 flex flex-col gap-3 sm:gap-4">
+          {/* Service mode toggle */}
+          <div className="flex rounded overflow-hidden border border-black/15 dark:border-white/10">
+            <button
+              onClick={() => { setServiceMode('point-to-point'); setReturnTrip(false); }}
+              className={`flex-1 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${!isHourly ? 'bg-gold text-white' : 'bg-black/5 dark:bg-white/5 text-text-secondary hover:text-text-primary'}`}
+            >Point to Point</button>
+            <button
+              onClick={() => { setServiceMode('hourly'); setReturnTrip(false); }}
+              className={`flex-1 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${isHourly ? 'bg-gold text-white' : 'bg-black/5 dark:bg-white/5 text-text-secondary hover:text-text-primary'}`}
+            >By the Hour</button>
+          </div>
+
           <AddressInput label="Origin" placeholder="Pickup address" onSelect={setOrigin} />
-          <AddressInput label="Destination" placeholder="Destination address" onSelect={setDestination} />
+
+          <AnimatePresence mode="wait">
+            {isHourly ? (
+              <motion.div key="hourly" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }}>
+                <label className="text-[10px] font-semibold text-gold uppercase tracking-widest mb-1 block">Duration</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min={HOURLY_MIN}
+                    max={HOURLY_MAX}
+                    value={selectedHours}
+                    onChange={(e) => setSelectedHours(Number(e.target.value))}
+                    className="flex-1 accent-gold"
+                  />
+                  <span className="text-sm font-semibold text-text-primary w-16 text-center">{selectedHours} hr{selectedHours !== 1 ? 's' : ''}</span>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div key="destination" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }}>
+                <AddressInput label="Destination" placeholder="Destination address" onSelect={setDestination} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div>
             <label className="text-[10px] font-semibold text-gold uppercase tracking-widest mb-1 block">Pick-up Date / Time</label>
-            <input type="date" min={todayStr} value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className={INPUT_CLASS} />
-            <AnimatePresence>
-              {selectedDate !== '' && (
-                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.25 }} className="overflow-hidden">
-                  <input type="time" value={selectedTime} onChange={(e) => setSelectedTime(e.target.value)} className={INPUT_CLASS + ' mt-2'} />
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <DateTimePicker
+              date={selectedDate}
+              time={selectedTime}
+              onDateChange={setSelectedDate}
+              onTimeChange={setSelectedTime}
+              minDate={todayStr}
+            />
           </div>
-          <div className="flex items-center gap-2 mt-1">
-            <input type="checkbox" id="returnTrip" checked={returnTrip} onChange={(e) => setReturnTrip(e.target.checked)} className="w-4 h-4 rounded border-white/30 text-gold focus:ring-gold bg-white/10 checked:bg-gold accent-gold cursor-pointer" />
-            <label htmlFor="returnTrip" className="text-sm text-text-secondary cursor-pointer">Add return trip</label>
-          </div>
+
+          {!isHourly && (
+            <div className="flex items-center gap-2 mt-1">
+              <input type="checkbox" id="returnTrip" checked={returnTrip} onChange={(e) => setReturnTrip(e.target.checked)} className="w-4 h-4 rounded border-white/30 text-gold focus:ring-gold bg-white/10 checked:bg-gold accent-gold cursor-pointer" />
+              <label htmlFor="returnTrip" className="text-sm text-text-secondary cursor-pointer">Add return trip</label>
+            </div>
+          )}
+
           <button disabled={loadingRoute || !canSearch} onClick={handleGetPrices} className="w-full mt-1 sm:mt-2 py-2.5 sm:py-3 bg-gold hover:bg-gold-hover text-white text-sm font-medium rounded-sm transition-colors flex items-center justify-center gap-2 group animate-shimmer disabled:opacity-60 disabled:cursor-not-allowed">
             {loadingRoute ? (<><LoaderIcon className="w-4 h-4 animate-spin" /> Calculating...</>) : (<>GET PRICES <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></>)}
           </button>
@@ -745,10 +800,10 @@ export function BookingForm({ onRoutePreview }: BookingFormProps) {
       </motion.div>
 
       {/* Full-page overlay — stays mounted for steps 2-5, no fade between steps */}
-      {step >= 2 && origin && destination && routeResult && (
+      {step >= 2 && origin && (isHourly || (destination && routeResult)) && (
         <OverlayPortal step={step} onClose={handleEdit}>
           {step === 2 && (
-            <VehicleSelectionContent origin={origin} destination={destination} date={selectedDate} time={selectedTime} returnTrip={returnTrip} routeResult={routeResult} onEdit={handleEdit} onSelect={handleVehicleSelect} />
+            <VehicleSelectionContent origin={origin} destination={destination} date={selectedDate} time={selectedTime} serviceMode={serviceMode} returnTrip={returnTrip} routeResult={routeResult} hours={selectedHours} onEdit={handleEdit} onSelect={handleVehicleSelect} />
           )}
           {step === 3 && selectedBreakdown && (
             <LoginContent origin={originCity} destination={destCity} date={selectedDate} time={selectedTime} breakdown={selectedBreakdown} onEdit={handleEdit} onContinue={handleLoginContinue} />

@@ -9,15 +9,15 @@
 /* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
 
 :root {
-  --bg-primary: #FDFCFA;
-  --bg-surface: #f9e7c9;
-  --bg-surface-elevated: #F7F3EE;
-  --text-primary: #1A1A1A;
-  --text-secondary: #6B6B6B;
-  --accent-gold: #C9A84C;
-  --accent-gold-hover: #D4AF37;
+  --bg-primary: #FFFFFF;
+  --bg-surface: #F5F0E8;
+  --bg-surface-elevated: #F0EBE3;
+  --text-primary: #111111;
+  --text-secondary: #555555;
+  --accent-gold: #B8960F;
+  --accent-gold-hover: #C9A84C;
   --accent-gold-light: #F5EDD6;
-  --border: #E8E4DC;
+  --border: #D5CFC5;
   --overlay: rgba(0, 0, 0, 0.6);
 }
 
@@ -38,6 +38,8 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
   transition: background-color 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
 }

@@ -31,10 +31,10 @@ export function ServicesSection() {
   return (
     <section
       id="services"
-      className="relative pt-44 pb-24 md:pt-52 md:pb-32 bg-[#141414] text-[#F5F0E8] -mt-20 [clip-path:polygon(0_5rem,100%_0,100%_100%,0_100%)]"
+      className="relative pt-[calc(5vw+2rem)] pb-[calc(5vw+2rem)] md:pt-[calc(5vw+3rem)] md:pb-[calc(5vw+2.5rem)] bg-[#141414] dark:bg-[#161616] text-[#F5F0E8] -mt-[5vw] [clip-path:polygon(0_5vw,100%_0,100%_100%,0_100%)]"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-16 md:mb-24">
+        <div className="text-center mb-10 md:mb-14">
           <motion.span
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}

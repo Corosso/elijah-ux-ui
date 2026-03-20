@@ -6,6 +6,9 @@ import { Footer } from './components/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
 import { HomePage } from './pages/HomePage';
 import { LegalPage } from './pages/LegalPage';
+import { CitiesPage } from './pages/CitiesPage';
+import { LoginPage } from './pages/LoginPage';
+import { SignupPage } from './pages/SignupPage';
 import { AdminPage } from './pages/AdminPage';
 
 export function App() {
@@ -27,6 +30,16 @@ export function App() {
           }
         />
         <Route
+          path="/cities"
+          element={
+            <>
+              <Navbar isDark={isDark} toggleDark={toggleDark} user={user} onLogin={() => setUser("Test User")} onLogout={() => setUser(null)} />
+              <CitiesPage />
+              <Footer />
+            </>
+          }
+        />
+        <Route
           path="/legal"
           element={
             <>
@@ -36,6 +49,8 @@ export function App() {
             </>
           }
         />
+        <Route path="/login" element={<LoginPage onLogin={() => setUser("Test User")} />} />
+        <Route path="/signup" element={<SignupPage onLogin={() => setUser("Test User")} />} />
         <Route path="/admin-panel-97x" element={<AdminPage />} />
       </Routes>
     </div>

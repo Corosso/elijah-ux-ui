@@ -1,8 +1,9 @@
 import { Hero } from '../components/Hero';
 import { FleetSection } from '../components/FleetSection';
 import { CitiesSection } from '../components/CitiesSection';
+import { OurServicesSection } from '../components/OurServicesSection';
 import { ServicesSection } from '../components/ServicesSection';
-import { ExperienceSection } from '../components/ExperienceSection';
+import { ReviewsSection } from '../components/ReviewsSection';
 import { CTASection } from '../components/CTASection';
 
 interface HomePageProps {
@@ -16,7 +17,8 @@ export function HomePage({ isDark }: HomePageProps) {
       <FleetSection />
       <CitiesSection />
       <ServicesSection />
-      <ExperienceSection />
+      <OurServicesSection />
+      <ReviewsSection />
       <CTASection />
     </main>
   );
