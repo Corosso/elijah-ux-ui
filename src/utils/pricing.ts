@@ -109,7 +109,7 @@ type HourlyTier = Record<number, number>;
 
 // NYC / Philadelphia / Boston
 const TIER_NORTHEAST: HourlyTier = {
-  2: 95, 4: 120, 5: 130, 3: 140, 1: 190, 6: 220,
+  2: 95, 4: 120, 5: 130, 3: 140, 1: 190, 6: 220, 7: 230,
 };
 
 // Los Angeles
@@ -117,12 +117,12 @@ const TIER_WEST_COAST: HourlyTier = {
   2: 110, 5: 120, 4: 140, 3: 150, 1: 160, 6: 200,
 };
 
-// Miami (no First Class available on Ridelux — use Business SUV + uplift)
+// Miami (no Stretch Limo / First Class on Ridelux for this market)
 const TIER_SOUTHEAST: HourlyTier = {
   2: 100, 4: 120, 5: 120, 3: 140, 1: 160, 6: 230,
 };
 
-// Washington DC (no Electric available on Ridelux — use SUV rate)
+// Washington DC (no Electric / Stretch Limo on Ridelux for this market)
 const TIER_CAPITAL: HourlyTier = {
   2: 100, 4: 120, 5: 120, 3: 140, 1: 200, 6: 280,
 };

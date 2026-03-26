@@ -35,3 +35,33 @@ export async function getBookingQuote(booking: BookingRequest): Promise<BookingR
     body: booking,
   });
 }
+
+/* ── Ridelux proxy pricing (point-to-point only) ─────────────── */
+export interface RideluxPriceResult {
+  vehicleId: number;
+  vehicleName: string;
+  totalAmount: number;
+  distanceMiles: number;
+}
+
+interface RideluxPricingResponse {
+  source: 'live' | 'cache';
+  results: RideluxPriceResult[];
+}
+
+export async function getRideluxPricing(
+  pickupLat: number, pickupLng: number,
+  dropoffLat: number, dropoffLng: number,
+  pickupAddress?: string, dropoffAddress?: string,
+): Promise<RideluxPriceResult[]> {
+  const res = await fetch('/api/ridelux-pricing', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pickupLat, pickupLng, dropoffLat, dropoffLng, pickupAddress, dropoffAddress }),
+  });
+
+  if (!res.ok) throw new Error('Ridelux pricing unavailable');
+
+  const data: RideluxPricingResponse = await res.json();
+  return data.results;
+}

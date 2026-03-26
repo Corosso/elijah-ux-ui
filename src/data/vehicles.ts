@@ -91,4 +91,19 @@ export const vehicles: Vehicle[] = [
       'Free cancellation 48 hours before pickup',
     ],
   },
+  {
+    id: 7,
+    name: 'Lincoln MKT Stretch',
+    category: 'Stretch Limo',
+    description: 'Lincoln MKT Stretch Limousine or similar',
+    passengers: 7,
+    luggage: 7,
+    image: '/flota/lincoln-stretch-limousine.png',
+    features: [
+      'Perfect for special occasions',
+      'Complimentary in-vehicle WiFi available',
+      'Complimentary bottled water & champagne',
+      'Free cancellation 48 hours before pickup',
+    ],
+  },
 ];

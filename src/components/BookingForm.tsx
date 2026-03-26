@@ -13,6 +13,7 @@ import { useDebounce } from '../hooks/useDebounce';
 import { vehicles } from '../data/vehicles';
 import { calculatePrice, HOURLY_MIN, HOURLY_MAX } from '../utils/pricing';
 import type { PricingBreakdown, ServiceMode } from '../utils/pricing';
+import { getRideluxPricing } from '../api/services';
 import { DateTimePicker } from './DateTimePicker';
 
 interface BookingFormProps {
@@ -366,14 +367,73 @@ function VehicleSelectionContent({ origin, destination, date, time, serviceMode,
   serviceMode: ServiceMode; returnTrip: boolean; routeResult: RouteGeometry | null; hours: number;
   onEdit: () => void; onSelect: (name: string, breakdown: PricingBreakdown) => void;
 }) {
-  const breakdowns = useMemo(
-    () => Object.fromEntries(vehicles.map(v => [v.id,
-      serviceMode === 'hourly'
-        ? calculatePrice({ mode: 'hourly', hours, vehicleId: v.id, pickupLat: origin.lat, pickupLng: origin.lng })
-        : calculatePrice({ mode: 'point-to-point', distanceKm: (routeResult?.distance ?? 0) / 1000, vehicleId: v.id, returnTrip, pickupLat: origin.lat, pickupLng: origin.lng }),
-    ])),
-    [serviceMode, hours, routeResult?.distance, returnTrip, origin.lat, origin.lng],
+  // Hourly breakdowns (local model, already calibrated)
+  const hourlyBreakdowns = useMemo(
+    () => serviceMode === 'hourly'
+      ? Object.fromEntries(vehicles.map(v => [v.id,
+          calculatePrice({ mode: 'hourly', hours, vehicleId: v.id, pickupLat: origin.lat, pickupLng: origin.lng }),
+        ]))
+      : null,
+    [serviceMode, hours, origin.lat, origin.lng],
   );
+
+  // Ridelux live pricing for point-to-point
+  const [rideluxBreakdowns, setRideluxBreakdowns] = useState<Record<number, PricingBreakdown> | null>(null);
+  const [pricingLoading, setPricingLoading] = useState(false);
+  const [pricingError, setPricingError] = useState(false);
+
+  useEffect(() => {
+    if (serviceMode !== 'point-to-point' || !destination) {
+      setRideluxBreakdowns(null);
+      setPricingLoading(false);
+      setPricingError(false);
+      return;
+    }
+
+    let cancelled = false;
+    setPricingLoading(true);
+    setPricingError(false);
+
+    getRideluxPricing(
+      origin.lat, origin.lng,
+      destination.lat, destination.lng,
+      origin.label, destination.label,
+    )
+      .then((results) => {
+        if (cancelled) return;
+        const map: Record<number, PricingBreakdown> = {};
+        for (const r of results) {
+          const returnLegCost = returnTrip ? r.totalAmount * 0.90 : 0;
+          map[r.vehicleId] = {
+            subtotal: r.totalAmount,
+            returnLegCost: Math.round(returnLegCost * 100) / 100,
+            total: Math.round((r.totalAmount + returnLegCost) * 100) / 100,
+          };
+        }
+        setRideluxBreakdowns(map);
+      })
+      .catch(() => {
+        if (!cancelled) setPricingError(true);
+      })
+      .finally(() => {
+        if (!cancelled) setPricingLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [serviceMode, origin.lat, origin.lng, destination?.lat, destination?.lng, returnTrip]);
+
+  const breakdowns = serviceMode === 'hourly' ? hourlyBreakdowns : rideluxBreakdowns;
+  const isPointToPointLoading = serviceMode === 'point-to-point' && pricingLoading;
+
+  // For point-to-point, only show vehicles that Ridelux returned prices for
+  // Sort all vehicles by price (lowest first)
+  const availableVehicles = useMemo(() => {
+    const filtered = serviceMode === 'point-to-point' && rideluxBreakdowns
+      ? vehicles.filter(v => rideluxBreakdowns[v.id] != null)
+      : vehicles;
+    if (!breakdowns) return filtered;
+    return [...filtered].sort((a, b) => (breakdowns[a.id]?.total ?? 0) - (breakdowns[b.id]?.total ?? 0));
+  }, [serviceMode, rideluxBreakdowns, breakdowns]);
 
   const originLabel = extractCity(origin.label);
   const destLabel = serviceMode === 'hourly'
@@ -386,7 +446,19 @@ function VehicleSelectionContent({ origin, destination, date, time, serviceMode,
       <div className="flex flex-col lg:flex-row gap-5 sm:gap-8">
         <div className="flex-1 space-y-4 sm:space-y-6">
           <h2 className="text-[10px] sm:text-xs font-semibold text-gold uppercase tracking-widest">Step 2 of 5 — Vehicle Class</h2>
-          {vehicles.map((v) => <VehicleCard key={v.id} vehicle={v} breakdown={breakdowns[v.id]} onSelect={onSelect} />)}
+          {isPointToPointLoading ? (
+            <div className="flex flex-col items-center justify-center py-16 sm:py-24 gap-4">
+              <LoaderIcon className="w-8 h-8 text-gold animate-spin" />
+              <p className="text-sm text-text-secondary">Getting the best rates for your trip...</p>
+            </div>
+          ) : pricingError ? (
+            <div className="flex flex-col items-center justify-center py-16 sm:py-24 gap-4">
+              <p className="text-sm text-text-secondary">Unable to load pricing. Please try again.</p>
+              <button onClick={onEdit} className="px-6 py-2 bg-gold hover:bg-gold-hover text-white text-sm font-bold rounded transition-colors">GO BACK</button>
+            </div>
+          ) : (
+            availableVehicles.map((v) => <VehicleCard key={v.id} vehicle={v} breakdown={breakdowns?.[v.id] ?? null} onSelect={onSelect} />)
+          )}
         </div>
         <div className="lg:w-[280px] flex-shrink-0 space-y-4">
           <div className="border border-border rounded-lg p-5 bg-bg-primary dark:bg-bg-elevated">
