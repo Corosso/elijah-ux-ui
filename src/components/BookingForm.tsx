@@ -11,7 +11,7 @@ import { geocodeAutocomplete, getDirections } from '../api/googleMaps';
 import type { GeocodeSuggestion, RouteGeometry } from '../api/googleMaps';
 import { useDebounce } from '../hooks/useDebounce';
 import { vehicles } from '../data/vehicles';
-import { calculatePrice, HOURLY_MIN, HOURLY_MAX } from '../utils/pricing';
+import { calculatePrice, getAvailableVehicles, HOURLY_MIN, HOURLY_MAX } from '../utils/pricing';
 import type { PricingBreakdown, ServiceMode } from '../utils/pricing';
 import { DateTimePicker } from './DateTimePicker';
 
@@ -366,6 +366,14 @@ function VehicleSelectionContent({ origin, destination, date, time, serviceMode,
   serviceMode: ServiceMode; returnTrip: boolean; routeResult: RouteGeometry | null; hours: number;
   onEdit: () => void; onSelect: (name: string, breakdown: PricingBreakdown) => void;
 }) {
+  // Filter vehicles by market availability and compute prices
+  const availableIds = useMemo(
+    () => serviceMode === 'point-to-point'
+      ? getAvailableVehicles(origin.lat, origin.lng)
+      : null, // hourly shows all vehicles (availability handled via tier rates)
+    [serviceMode, origin.lat, origin.lng],
+  );
+
   const breakdowns = useMemo(
     () => Object.fromEntries(vehicles.map(v => [v.id,
       serviceMode === 'hourly'
@@ -374,6 +382,14 @@ function VehicleSelectionContent({ origin, destination, date, time, serviceMode,
     ])),
     [serviceMode, hours, routeResult?.distance, returnTrip, origin.lat, origin.lng],
   );
+
+  // Filter by market availability (point-to-point) and sort by price
+  const sortedVehicles = useMemo(() => {
+    const filtered = availableIds
+      ? vehicles.filter(v => availableIds.includes(v.id))
+      : vehicles;
+    return [...filtered].sort((a, b) => (breakdowns[a.id]?.total ?? 0) - (breakdowns[b.id]?.total ?? 0));
+  }, [availableIds, breakdowns]);
 
   const originLabel = extractCity(origin.label);
   const destLabel = serviceMode === 'hourly'
@@ -386,7 +402,7 @@ function VehicleSelectionContent({ origin, destination, date, time, serviceMode,
       <div className="flex flex-col lg:flex-row gap-5 sm:gap-8">
         <div className="flex-1 space-y-4 sm:space-y-6">
           <h2 className="text-[10px] sm:text-xs font-semibold text-gold uppercase tracking-widest">Step 2 of 5 — Vehicle Class</h2>
-          {vehicles.map((v) => <VehicleCard key={v.id} vehicle={v} breakdown={breakdowns[v.id]} onSelect={onSelect} />)}
+          {sortedVehicles.map((v) => <VehicleCard key={v.id} vehicle={v} breakdown={breakdowns[v.id]} onSelect={onSelect} />)}
         </div>
         <div className="lg:w-[280px] flex-shrink-0 space-y-4">
           <div className="border border-border rounded-lg p-5 bg-bg-primary dark:bg-bg-elevated">
