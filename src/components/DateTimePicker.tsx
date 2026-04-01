@@ -135,25 +135,31 @@ function ClockFace({
       {/* Background circle */}
       <div className="absolute inset-0 rounded-full bg-gray-100 dark:bg-white/5" />
 
-      {/* Clock hand */}
+      {/* Clock hand — line from center to number + circle at tip */}
       <div
-        className="absolute left-1/2 top-1/2 origin-bottom"
+        className="absolute"
         style={{
           width: 2,
           height: RADIUS,
-          marginLeft: -1,
-          transform: `translateY(-100%) rotate(${handAngle}deg)`,
-          transformOrigin: 'bottom center',
+          left: CENTER - 1,
+          top: CENTER - RADIUS,
+          transformOrigin: `1px ${RADIUS}px`,
+          transform: `rotate(${handAngle}deg)`,
+          backgroundColor: 'var(--accent-gold)',
+          opacity: 0.7,
         }}
       >
-        <div className="w-full h-full bg-gold/60" />
         <div
-          className="absolute -top-[16px] left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-gold"
+          className="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full"
+          style={{ backgroundColor: 'var(--accent-gold)', top: -16 }}
         />
       </div>
 
       {/* Center dot */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-gold z-10" />
+      <div
+        className="absolute w-3 h-3 rounded-full z-10"
+        style={{ backgroundColor: 'var(--accent-gold)', left: CENTER - 6, top: CENTER - 6 }}
+      />
 
       {/* Numbers */}
       {numbers.map((n, i) => {
