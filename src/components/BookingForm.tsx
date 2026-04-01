@@ -275,17 +275,17 @@ function VehicleCard({ vehicle, breakdown, onSelect }: {
       {/* Mobile: stacked layout */}
       <div className="flex flex-col lg:flex-row lg:items-start gap-3 sm:gap-5 lg:gap-8">
         {/* Vehicle Image */}
-        <div className="flex justify-center lg:justify-start lg:w-[220px] flex-shrink-0">
+        <div className="flex justify-center lg:justify-start lg:w-[300px] flex-shrink-0">
           <img
             src={vehicle.image}
             alt={vehicle.name}
-            className="w-full max-w-[200px] sm:max-w-[240px] lg:max-w-[200px] h-auto object-contain dark:drop-shadow-[0_0_20px_rgba(200,170,110,0.25)]"
+            className="w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[290px] h-auto object-contain dark:drop-shadow-[0_0_20px_rgba(200,170,110,0.25)]"
           />
         </div>
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg sm:text-xl font-bold text-text-primary">{vehicle.category}</h3>
+          <h3 className="text-3xl sm:text-4xl font-bold text-text-primary font-serif">{vehicle.category}</h3>
           <p className="text-xs sm:text-sm text-text-secondary mt-0.5">{vehicle.description}</p>
 
           {/* Price — prominent on mobile */}
