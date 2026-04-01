@@ -89,12 +89,13 @@ export function MapPreview({ isDark, route, origin, destination, topOffset = 0 }
     const map = mapInstanceRef.current;
     if (!map) return;
     if (tileLayerRef.current) map.removeLayer(tileLayerRef.current);
-    const tileUrl = isDark
-      ? 'https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-    // Boost dark-mode tile contrast
+    // Dark mode: invert light Voyager tiles for a Google Maps-like dark aesthetic
+    // that preserves road/label contrast better than native dark tiles
+    const tileUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
     if (mapContainerRef.current) {
-      mapContainerRef.current.style.filter = isDark ? 'contrast(1.2) brightness(1.15)' : 'none';
+      mapContainerRef.current.style.filter = isDark
+        ? 'invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9)'
+        : 'none';
     }
     tileLayerRef.current = L.tileLayer(tileUrl, { subdomains: 'abcd', maxZoom: 20 }).addTo(map);
   }, [isDark]);
