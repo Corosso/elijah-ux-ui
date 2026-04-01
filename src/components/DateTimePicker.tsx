@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon, ClockIcon, PencilIcon } from 'lucide-react';
+import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon, ClockIcon } from 'lucide-react';
 
 /* ── Types ── */
 interface DateTimePickerProps {
@@ -19,7 +19,9 @@ const MONTH_NAMES = [
   'January','February','March','April','May','June',
   'July','August','September','October','November','December',
 ] as const;
-const TIME_PRESETS = ['08:00','09:00','10:00','12:00','14:00','16:00','18:00','20:00'] as const;
+
+const HOURS_12 = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as const;
+const MINUTES_DIAL = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55] as const;
 
 /* ── Helpers ── */
 const pad = (n: number) => n.toString().padStart(2, '0');
@@ -36,6 +38,159 @@ function parseTime(s: string) {
   if (!s) return { hour: 10, minute: 0 };
   const [h, m] = s.split(':').map(Number);
   return { hour: h, minute: m };
+}
+
+function to12(h24: number) {
+  const period: 'AM' | 'PM' = h24 >= 12 ? 'PM' : 'AM';
+  const h12 = h24 % 12 || 12;
+  return { h12, period };
+}
+
+function to24(h12: number, period: 'AM' | 'PM') {
+  if (period === 'AM') return h12 === 12 ? 0 : h12;
+  return h12 === 12 ? 12 : h12 + 12;
+}
+
+/* ── Analog Clock Face ── */
+function ClockFace({
+  mode, value, onChange, onSwitchToMinutes,
+}: {
+  mode: 'hour' | 'minute';
+  value: number; // hour in 1-12, or minute in 0-55
+  onChange: (v: number) => void;
+  onSwitchToMinutes: () => void;
+}) {
+  const faceRef = useRef<HTMLDivElement>(null);
+  const dragging = useRef(false);
+
+  const numbers = mode === 'hour' ? HOURS_12 : MINUTES_DIAL;
+  const RADIUS = 100;
+  const CENTER = 130;
+
+  const getAngleForValue = (v: number) => {
+    if (mode === 'hour') {
+      return ((v % 12) / 12) * 360;
+    }
+    return (v / 60) * 360;
+  };
+
+  const getValueFromAngle = (angleDeg: number) => {
+    const normalized = ((angleDeg % 360) + 360) % 360;
+    if (mode === 'hour') {
+      let h = Math.round(normalized / 30);
+      if (h === 0) h = 12;
+      return h;
+    }
+    let m = Math.round(normalized / 6);
+    if (m === 60) m = 0;
+    // Snap to nearest 5
+    m = Math.round(m / 5) * 5;
+    if (m === 60) m = 0;
+    return m;
+  };
+
+  const handlePointer = useCallback((clientX: number, clientY: number) => {
+    const face = faceRef.current;
+    if (!face) return;
+    const rect = face.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = clientX - cx;
+    const dy = clientY - cy;
+    let angle = Math.atan2(dx, -dy) * (180 / Math.PI);
+    if (angle < 0) angle += 360;
+    onChange(getValueFromAngle(angle));
+  }, [mode, onChange]);
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    dragging.current = true;
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    handlePointer(e.clientX, e.clientY);
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!dragging.current) return;
+    handlePointer(e.clientX, e.clientY);
+  };
+
+  const onPointerUp = () => {
+    if (!dragging.current) return;
+    dragging.current = false;
+    if (mode === 'hour') {
+      onSwitchToMinutes();
+    }
+  };
+
+  const handAngle = getAngleForValue(value);
+
+  return (
+    <div
+      ref={faceRef}
+      className="relative select-none touch-none"
+      style={{ width: CENTER * 2, height: CENTER * 2 }}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+    >
+      {/* Background circle */}
+      <div className="absolute inset-0 rounded-full bg-gray-100 dark:bg-white/5" />
+
+      {/* Clock hand */}
+      <div
+        className="absolute left-1/2 top-1/2 origin-bottom"
+        style={{
+          width: 2,
+          height: RADIUS,
+          marginLeft: -1,
+          transform: `translateY(-100%) rotate(${handAngle}deg)`,
+          transformOrigin: 'bottom center',
+        }}
+      >
+        <div className="w-full h-full bg-gold/60" />
+        <div
+          className="absolute -top-[16px] left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-gold"
+        />
+      </div>
+
+      {/* Center dot */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-gold z-10" />
+
+      {/* Numbers */}
+      {numbers.map((n, i) => {
+        const angle = (i / 12) * 2 * Math.PI - Math.PI / 2;
+        const x = CENTER + RADIUS * Math.cos(angle + Math.PI / 2);
+        const y = CENTER + RADIUS * Math.sin(angle + Math.PI / 2);
+        // Shift the angle by -90deg so 12/0 is at top
+        const correctedAngle = ((i / 12) * 360);
+        const isSelected = n === value;
+        const displayLabel = mode === 'minute' ? pad(n) : n;
+
+        // Position using polar coordinates (12 o'clock = top)
+        const rad = (correctedAngle - 90) * (Math.PI / 180);
+        const px = CENTER + RADIUS * Math.cos(rad);
+        const py = CENTER + RADIUS * Math.sin(rad);
+
+        return (
+          <button
+            key={n}
+            type="button"
+            className={`absolute w-8 h-8 -ml-4 -mt-4 flex items-center justify-center rounded-full text-sm font-medium transition-colors z-10 ${
+              isSelected
+                ? 'text-white'
+                : 'text-text-primary hover:bg-gold/10'
+            }`}
+            style={{ left: px, top: py }}
+            onClick={() => {
+              onChange(n);
+              if (mode === 'hour') setTimeout(onSwitchToMinutes, 200);
+            }}
+          >
+            {displayLabel}
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
 /* ── Modal (portaled) ── */
@@ -55,8 +210,19 @@ function PickerModal({
   const [tab, setTab] = useState<'date' | 'time'>('date');
   const [viewYear, setViewYear] = useState(sel?.year ?? now.getFullYear());
   const [viewMonth, setViewMonth] = useState(sel?.month ?? now.getMonth());
-  const [tempHour, setTempHour] = useState(initHour);
+  const [tempHour24, setTempHour24] = useState(initHour);
   const [tempMinute, setTempMinute] = useState(initMinute);
+  const [clockMode, setClockMode] = useState<'hour' | 'minute'>('hour');
+
+  const { h12, period } = to12(tempHour24);
+
+  const setPeriod = (p: 'AM' | 'PM') => {
+    setTempHour24(to24(h12, p));
+  };
+
+  const setHour12 = (h: number) => {
+    setTempHour24(to24(h, period));
+  };
 
   // Lock scroll
   useEffect(() => {
@@ -75,10 +241,12 @@ function PickerModal({
   const handleDayClick = (day: number) => {
     if (isDisabled(day)) return;
     onDateChange(`${viewYear}-${pad(viewMonth + 1)}-${pad(day)}`);
+    // Auto-transition to time picker after selecting a date
+    setTimeout(() => setTab('time'), 250);
   };
 
   const handleOk = () => {
-    onTimeChange(`${pad(tempHour)}:${pad(tempMinute)}`);
+    onTimeChange(`${pad(tempHour24)}:${pad(tempMinute)}`);
     onClose();
   };
 
@@ -118,14 +286,13 @@ function PickerModal({
         <div className="bg-gold text-white px-5 py-4">
           <div className="flex items-start justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-widest opacity-80">Pick-up Date / Time</span>
-            <PencilIcon className="w-3.5 h-3.5 opacity-50" />
           </div>
           <div className="flex items-end justify-between mt-2">
             <div>
               <p className="text-xs opacity-60">{displayYear}</p>
               <p className="text-2xl font-bold leading-tight">{sel ? `${displayMonth} ${displayDay}` : 'Pick a date'}</p>
             </div>
-            <p className="text-4xl font-bold tabular-nums leading-none">{pad(tempHour)}:{pad(tempMinute)}</p>
+            <p className="text-4xl font-bold tabular-nums leading-none">{pad(tempHour24)}:{pad(tempMinute)}</p>
           </div>
         </div>
 
@@ -134,7 +301,7 @@ function PickerModal({
           {(['date', 'time'] as const).map(t => (
             <button
               key={t}
-              onClick={() => setTab(t)}
+              onClick={() => { setTab(t); if (t === 'time') setClockMode('hour'); }}
               className={`flex-1 py-3 flex items-center justify-center transition-colors ${
                 tab === t ? 'text-gold border-b-2 border-gold' : 'text-text-secondary'
               }`}
@@ -196,33 +363,30 @@ function PickerModal({
             </div>
           </div>
         ) : (
-          <div className="p-5 flex flex-col items-center gap-5">
-            <p className="text-xs text-text-secondary font-medium uppercase tracking-wider">Select Time</p>
+          <div className="p-5 flex flex-col items-center gap-4">
+            {/* Clock face */}
+            <ClockFace
+              mode={clockMode}
+              value={clockMode === 'hour' ? h12 : tempMinute}
+              onChange={clockMode === 'hour' ? setHour12 : setTempMinute}
+              onSwitchToMinutes={() => setClockMode('minute')}
+            />
 
-            <div className="flex items-center gap-4">
-              {/* Hours */}
-              <Spinner value={tempHour} onChange={setTempHour} min={0} max={23} />
-              <span className="text-4xl font-bold text-text-primary">:</span>
-              {/* Minutes */}
-              <Spinner value={tempMinute} onChange={setTempMinute} min={0} max={55} step={5} />
-            </div>
-
-            {/* Quick presets */}
-            <div className="flex flex-wrap gap-2 justify-center">
-              {TIME_PRESETS.map(t => {
-                const active = `${pad(tempHour)}:${pad(tempMinute)}` === t;
-                return (
-                  <button
-                    key={t}
-                    onClick={() => { const [h, m] = t.split(':').map(Number); setTempHour(h); setTempMinute(m); }}
-                    className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${
-                      active ? 'border-gold bg-gold/10 text-gold font-semibold' : 'border-border text-text-secondary hover:border-gold/50'
-                    }`}
-                  >
-                    {t}
-                  </button>
-                );
-              })}
+            {/* AM / PM toggle */}
+            <div className="flex items-center gap-2">
+              {(['AM', 'PM'] as const).map(p => (
+                <button
+                  key={p}
+                  onClick={() => setPeriod(p)}
+                  className={`w-12 h-12 rounded-full text-sm font-bold transition-colors ${
+                    period === p
+                      ? 'bg-gold text-white'
+                      : 'bg-gray-100 dark:bg-white/10 text-text-secondary hover:bg-gold/10'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
             </div>
           </div>
         )}
@@ -238,26 +402,6 @@ function PickerModal({
         </div>
       </motion.div>
     </motion.div>
-  );
-}
-
-/* ── Spinner sub-component ── */
-function Spinner({ value, onChange, min, max, step = 1 }: {
-  value: number; onChange: (v: number) => void; min: number; max: number; step?: number;
-}) {
-  const inc = () => onChange(value + step > max ? min : value + step);
-  const dec = () => onChange(value - step < min ? max : value - step);
-
-  return (
-    <div className="flex flex-col items-center gap-2">
-      <button onClick={inc} className="p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-text-secondary">
-        <ChevronLeftIcon className="w-5 h-5 rotate-90" />
-      </button>
-      <span className="text-4xl font-bold text-text-primary tabular-nums w-16 text-center">{pad(value)}</span>
-      <button onClick={dec} className="p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-text-secondary">
-        <ChevronRightIcon className="w-5 h-5 rotate-90" />
-      </button>
-    </div>
   );
 }
 
