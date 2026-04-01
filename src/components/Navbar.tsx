@@ -34,7 +34,7 @@ export function Navbar({ isDark, toggleDark, user, onLogin, onLogout }: NavbarPr
         <div className="flex justify-between items-center">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 sm:gap-3">
-            <img src="/logo.png" alt="Elijah Logo" className="h-7 sm:h-8 w-auto object-contain" />
+            <img src="/logo.png" alt="Elijah Logo" className="h-10 sm:h-12 w-auto object-contain" />
             <span className={`font-serif text-lg sm:text-xl tracking-[0.15em] sm:tracking-[0.2em] uppercase transition-colors text-glow-gold ${isScrolled ? "text-white dark:text-text-primary" : "text-white"}`}>
               Elijah
             </span>
