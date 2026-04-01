@@ -27,8 +27,8 @@ export default {
         overlay: 'var(--overlay)',
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        serif: ['Playfair Display', 'serif'],
+        sans: ['DM Sans', 'sans-serif'],
+        serif: ['Cormorant Garamond', 'serif'],
       },
       boxShadow: {
         'luxury': '0 10px 40px -10px rgba(0,0,0,0.08)',
