@@ -114,7 +114,7 @@ export function MapPreview({ isDark, route, origin, destination, topOffset = 0 }
       const latLngs: L.LatLngExpression[] = route.coordinates.map(([lng, lat]) => [lat, lng]);
 
       L.polyline(latLngs, {
-        color: '#D4AF37',
+        color: '#CDA84E',
         weight: 4,
         opacity: 0.8,
         lineCap: 'round',
@@ -129,7 +129,7 @@ export function MapPreview({ isDark, route, origin, destination, topOffset = 0 }
       });
       const destIcon = L.divIcon({
         className: 'custom-marker',
-        html: '<div style="width: 16px; height: 16px; background-color: #D4AF37; border: 3px solid white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+        html: '<div style="width: 16px; height: 16px; background-color: #CDA84E; border: 3px solid white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
         iconSize: [16, 16],
         iconAnchor: [8, 8],
       });
