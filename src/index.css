@@ -8,37 +8,68 @@
 
 /* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
 
+/* ── Focus-visible for keyboard navigation ── */
+@layer base {
+  button:focus-visible,
+  a:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 2px solid var(--accent-gold);
+    outline-offset: 2px;
+  }
+
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: none;
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 0 1px var(--accent-gold);
+  }
+}
+
 :root {
   --bg-primary: #FFFFFF;
   --bg-surface: #F5F0E8;
   --bg-surface-elevated: #F0EBE3;
+  --bg-page: #F2F0ED;
+  --bg-section-dark: #161412;
   --text-primary: #111111;
   --text-secondary: #555555;
-  --accent-gold: #C6A84D;
-  --accent-gold-hover: #D4B85C;
-  --accent-gold-light: #f9df98;
+  --accent-gold: #B8952F;
+  --accent-gold-hover: #C9A43B;
+  --accent-gold-light: #F6ECCE;
   --border: #D5CFC5;
   --overlay: rgba(0, 0, 0, 0.6);
+  --color-origin: #10B981;
+
+  /* ── Fluid typographic scale ── */
+  --fs-heading-sm: clamp(1.5625rem, 1.35rem + 0.56vw, 1.9375rem);
+  --fs-heading-md: clamp(1.9375rem, 1.59rem + 0.93vw, 2.4375rem);
+  --fs-heading-lg: clamp(2.4375rem, 1.91rem + 1.4vw, 3.0625rem);
+  --fs-display-sm: clamp(2.4375rem, 1.74rem + 1.86vw, 3.8125rem);
+  --fs-display-lg: clamp(3.0625rem, 2.12rem + 2.5vw, 4.75rem);
 }
 
 .dark {
-  --bg-primary: #0A0A0A;
-  --bg-surface: #141414;
-  --bg-surface-elevated: #1E1E1E;
+  --bg-primary: #0C0B0A;
+  --bg-surface: #161412;
+  --bg-surface-elevated: #211E1B;
+  --bg-page: var(--bg-primary);
+  --bg-section-dark: var(--bg-surface);
   --text-primary: #F5F0E8;
   --text-secondary: #9A9590;
-  --accent-gold: #D4AF37;
-  --accent-gold-hover: #E0C068;
-  --accent-gold-light: #2A2318;
-  --border: #2A2520;
+  --accent-gold: #CDA84E;
+  --accent-gold-hover: #DABB65;
+  --accent-gold-light: #2B2215;
+  --border: #2D2722;
   --overlay: rgba(0, 0, 0, 0.8);
+  --color-origin: #10B981;
 }
 
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 16px;
+  font-family: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 1rem;
   line-height: 1.6;
   letter-spacing: 0.01em;
   -webkit-font-smoothing: antialiased;
@@ -47,14 +78,51 @@ body {
   overflow-x: hidden;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: 'Cormorant Garamond', serif;
-  letter-spacing: 0.02em;
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+}
+
+/* Per-level optical letter-spacing: tighter at larger sizes */
+h1 { letter-spacing: -0.02em; }
+h2 { letter-spacing: -0.015em; }
+h3 { letter-spacing: -0.01em; }
+h4 { letter-spacing: -0.005em; }
+h5 { letter-spacing: 0; }
+h6 { letter-spacing: 0.01em; }
+
+/* ── Typographic component classes ── */
+@layer components {
+  .text-eyebrow {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .text-eyebrow-sm {
+    font-size: 0.625rem;
+    line-height: 1.5;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .text-logo {
+    font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+    font-size: 1.25rem;
+    line-height: 1;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .text-logo-lg {
+    font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+    font-size: 1.5625rem;
+    line-height: 1;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
 }
 
 /* Custom Scrollbar */
@@ -74,34 +142,6 @@ h6 {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent-gold);
 }
-
-/* Shimmer Animation */
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-.animate-shimmer {
-  position: relative;
-  overflow: hidden;
-}
-
-.animate-shimmer::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
-  animation: shimmer 2s infinite;
-}
-
 
 
 /* Leaflet cursor fix - dark hand cursor for light mode */
@@ -161,5 +201,16 @@ h6 {
 
 /* Elijah text glow */
 .text-glow-gold {
-  text-shadow: 0 0 12px rgba(212, 175, 55, 0.7), 0 0 4px rgba(212, 175, 55, 0.4);
+  text-shadow: 0 0 12px rgba(205, 168, 78, 0.7), 0 0 4px rgba(205, 168, 78, 0.4);
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
