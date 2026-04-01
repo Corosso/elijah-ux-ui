@@ -133,7 +133,7 @@ function ClockFace({
       onPointerUp={onPointerUp}
     >
       {/* Background circle */}
-      <div className="absolute inset-0 rounded-full bg-gray-100 dark:bg-white/5" />
+      <div className="absolute inset-0 rounded-full bg-bg-surface dark:bg-white/5" />
 
       {/* Clock hand — line from center to number + circle at tip */}
       <div
@@ -180,7 +180,7 @@ function ClockFace({
           <button
             key={n}
             type="button"
-            className={`absolute w-8 h-8 -ml-4 -mt-4 flex items-center justify-center rounded-full text-sm font-medium transition-colors z-10 ${
+            className={`absolute w-8 h-8 -ml-4 -mt-4 flex items-center justify-center rounded-full text-caption font-medium transition-colors z-10 ${
               isSelected
                 ? 'text-white'
                 : 'text-text-primary hover:bg-gold/10'
@@ -291,14 +291,14 @@ function PickerModal({
         {/* ── Header ── */}
         <div className="bg-gold text-white px-5 py-4">
           <div className="flex items-start justify-between">
-            <span className="text-[10px] font-semibold uppercase tracking-widest opacity-80">Pick-up Date / Time</span>
+            <span className="text-eyebrow-sm opacity-80">Pick-up Date / Time</span>
           </div>
           <div className="flex items-end justify-between mt-2">
             <div>
-              <p className="text-xs opacity-60">{displayYear}</p>
-              <p className="text-2xl font-bold leading-tight">{sel ? `${displayMonth} ${displayDay}` : 'Pick a date'}</p>
+              <p className="text-caption opacity-60">{displayYear}</p>
+              <p className="text-heading-xs font-bold">{sel ? `${displayMonth} ${displayDay}` : 'Pick a date'}</p>
             </div>
-            <p className="text-4xl font-bold tabular-nums leading-none">{pad(tempHour24)}:{pad(tempMinute)}</p>
+            <p className="text-heading-md font-bold tabular-nums leading-none">{pad(tempHour24)}:{pad(tempMinute)}</p>
           </div>
         </div>
 
@@ -322,7 +322,7 @@ function PickerModal({
           <div className="p-4">
             {/* Month navigation */}
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-medium text-text-primary">{MONTH_NAMES[viewMonth]} {viewYear}</span>
+              <span className="text-caption font-medium text-text-primary">{MONTH_NAMES[viewMonth]} {viewYear}</span>
               <div className="flex gap-1">
                 <button onClick={prevMonth} className="p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-text-secondary">
                   <ChevronLeftIcon className="w-4 h-4" />
@@ -336,7 +336,7 @@ function PickerModal({
             {/* Day-of-week headers */}
             <div className="grid grid-cols-7 mb-1">
               {DAY_LABELS.map((d, i) => (
-                <div key={i} className="text-center text-[11px] font-semibold text-text-secondary py-1">{d}</div>
+                <div key={i} className="text-center text-micro font-semibold text-text-secondary py-1">{d}</div>
               ))}
             </div>
 
@@ -354,7 +354,7 @@ function PickerModal({
                     <button
                       disabled={disabled}
                       onClick={() => handleDayClick(day)}
-                      className={`w-full aspect-square flex items-center justify-center text-sm rounded-full transition-colors
+                      className={`w-full aspect-square flex items-center justify-center text-caption rounded-full transition-colors
                         ${disabled ? 'text-text-secondary/20 cursor-not-allowed' : 'hover:bg-gold/10 cursor-pointer'}
                         ${selected ? 'bg-gold text-white font-bold' : ''}
                         ${today ? 'ring-1 ring-gold text-gold font-semibold' : ''}
@@ -384,7 +384,7 @@ function PickerModal({
                 <button
                   key={p}
                   onClick={() => setPeriod(p)}
-                  className={`w-12 h-12 rounded-full text-sm font-bold transition-colors ${
+                  className={`w-12 h-12 rounded-full text-caption font-bold transition-colors ${
                     period === p
                       ? 'bg-gold text-white'
                       : 'bg-gray-100 dark:bg-white/10 text-text-secondary hover:bg-gold/10'
@@ -399,10 +399,10 @@ function PickerModal({
 
         {/* ── Footer ── */}
         <div className="flex items-center justify-end gap-6 px-5 py-3.5 border-t border-border">
-          <button onClick={onClose} className="text-sm font-semibold text-text-secondary uppercase tracking-wider hover:text-text-primary transition-colors">
+          <button onClick={onClose} className="text-caption font-semibold text-text-secondary uppercase tracking-wider hover:text-text-primary active:scale-[0.97] transition-all">
             Cancel
           </button>
-          <button onClick={handleOk} className="text-sm font-semibold text-gold uppercase tracking-wider hover:text-gold-hover transition-colors">
+          <button onClick={handleOk} className="text-caption font-semibold text-gold uppercase tracking-wider hover:text-gold-hover active:scale-[0.97] transition-all">
             OK
           </button>
         </div>
@@ -429,7 +429,7 @@ export function DateTimePicker({ date, time, onDateChange, onTimeChange, minDate
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="w-full bg-black/5 dark:bg-white/5 border border-black/15 dark:border-white/10 rounded py-2.5 px-3 text-left text-sm transition-all focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold flex items-center justify-between gap-2"
+        className="w-full bg-black/5 dark:bg-white/5 border border-black/15 dark:border-white/10 rounded py-2.5 px-3 text-left text-caption transition-all focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold flex items-center justify-between gap-2"
       >
         <span className={date ? 'text-text-primary' : 'text-text-secondary'}>{displayValue}</span>
         <CalendarIcon className="w-4 h-4 text-text-secondary flex-shrink-0" />

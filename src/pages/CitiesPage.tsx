@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { reveal, drift, staggerScaleIn, hoverLift } from '../utils/motion';
 
 // Extract unique cities from routes (origins + destinations)
 const cities = [
@@ -10,49 +11,33 @@ const cities = [
   { name: 'Washington D.C.', image: 'https://images.unsplash.com/photo-1501466044931-62695aada8e9?w=600&h=500&fit=crop' },
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
-  },
-};
-
 export function CitiesPage() {
+  const grid = staggerScaleIn(0.08);
   return (
     <main className="pt-20 pb-24 bg-bg-primary min-h-screen">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12 md:mb-16 pt-8">
           <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-gold text-xs font-semibold tracking-[0.2em] uppercase mb-3 block"
+            initial={drift.hidden}
+            animate={drift.visible}
+            className="text-gold text-eyebrow mb-3 block"
           >
             Our Locations
           </motion.span>
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
-            className="text-4xl md:text-5xl font-serif text-text-primary mb-4"
+            initial={reveal.hidden}
+            animate={reveal.visible}
+            transition={{ delay: 0.05 }}
+            className="text-heading-lg-fluid font-serif text-text-primary mb-4"
           >
             The icon of luxury rides.
           </motion.h1>
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-gold text-2xl md:text-3xl font-serif"
+            initial={drift.hidden}
+            animate={drift.visible}
+            transition={{ delay: 0.15 }}
+            className="text-gold text-heading-sm-fluid font-serif"
           >
             This is where your journey begins.
           </motion.p>
@@ -60,7 +45,7 @@ export function CitiesPage() {
 
         {/* City Cards Grid */}
         <motion.div
-          variants={containerVariants}
+          variants={grid.container}
           initial="hidden"
           animate="visible"
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6"
@@ -68,7 +53,8 @@ export function CitiesPage() {
           {cities.map((city, index) => (
             <motion.div
               key={city.name}
-              variants={itemVariants}
+              variants={grid.item}
+              whileHover={hoverLift}
               className="group relative aspect-[4/3] rounded-xl overflow-hidden cursor-pointer bg-black shadow-luxury dark:shadow-luxury-dark"
             >
               <img
@@ -79,7 +65,7 @@ export function CitiesPage() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="absolute inset-0 flex items-center justify-center z-10">
-                <h2 className="text-white text-2xl md:text-3xl font-serif text-center drop-shadow-lg">
+                <h2 className="text-white text-heading-sm-fluid font-serif text-center drop-shadow-lg">
                   {city.name}
                 </h2>
               </div>

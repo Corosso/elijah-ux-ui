@@ -35,7 +35,7 @@ export function Navbar({ isDark, toggleDark, user, onLogin, onLogout }: NavbarPr
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 sm:gap-3">
             <img src="/logo.png" alt="Elijah Logo" className="h-10 sm:h-12 w-auto object-contain" />
-            <span className={`font-serif text-lg sm:text-xl tracking-[0.15em] sm:tracking-[0.2em] uppercase transition-colors text-glow-gold ${isScrolled ? "text-white dark:text-text-primary" : "text-white"}`}>
+            <span className={`text-logo transition-colors text-glow-gold ${isScrolled ? "text-white dark:text-text-primary" : "text-white"}`}>
               Elijah
             </span>
           </Link>
@@ -44,16 +44,16 @@ export function Navbar({ isDark, toggleDark, user, onLogin, onLogout }: NavbarPr
           <div className="hidden md:flex items-center gap-8">
 
             <a
-              href="tel:+573001234567"
-              className={`flex items-center gap-1.5 text-sm font-medium hover:text-gold transition-colors ${isScrolled ? 'text-white/80 dark:text-text-secondary' : 'text-white/90'}`}
+              href="tel:+18005550199"
+              className={`flex items-center gap-1.5 text-caption font-medium hover:text-gold transition-colors ${isScrolled ? 'text-white/80 dark:text-text-secondary' : 'text-white/90'}`}
             >
               <PhoneIcon className="w-3.5 h-3.5" />
-              +57 300 123 4567
+              +1 (800) 555-0199
             </a>
 
             <Link
               to="/cities"
-              className={`text-sm font-semibold tracking-wider uppercase hover:text-gold transition-colors ${isScrolled ? 'text-white/80 dark:text-text-secondary' : 'text-white/90'}`}
+              className={`text-eyebrow hover:text-gold transition-colors ${isScrolled ? 'text-white/80 dark:text-text-secondary' : 'text-white/90'}`}
             >
               Cities We Serve
             </Link>
@@ -79,18 +79,18 @@ export function Navbar({ isDark, toggleDark, user, onLogin, onLogout }: NavbarPr
               {user ? (
                 <div className="flex items-center gap-2">
                   <UserIcon className="w-4 h-4 text-gold" />
-                  <span className={`text-sm font-medium ${isScrolled ? "text-white dark:text-text-primary" : "text-white"}`}>{user}</span>
+                  <span className={`text-caption font-medium ${isScrolled ? "text-white dark:text-text-primary" : "text-white"}`}>{user}</span>
                   <button onClick={onLogout} className="p-1 text-text-secondary hover:text-gold transition-colors" aria-label="Logout">
                     <LogOutIcon className="w-4 h-4" />
                   </button>
                 </div>
               ) : (
-                <Link to="/login" className={`text-sm font-medium hover:text-gold transition-colors ${isScrolled ? "text-white dark:text-text-primary" : "text-white"}`}>
+                <Link to="/login" className={`text-caption font-medium hover:text-gold transition-colors ${isScrolled ? "text-white dark:text-text-primary" : "text-white"}`}>
                   Login
                 </Link>
               )}
 
-              <Link to="/signup" className="px-5 py-2.5 bg-gold hover:bg-gold-hover text-white text-sm font-medium rounded-sm transition-colors animate-shimmer">
+              <Link to="/signup" className="px-5 py-2.5 bg-gold hover:bg-gold-hover text-white text-caption font-medium rounded-sm active:scale-[0.97] transition-all">
                 Signup
               </Link>
             </div>
@@ -125,13 +125,13 @@ export function Navbar({ isDark, toggleDark, user, onLogin, onLogout }: NavbarPr
                 <a
                   key={link.name}
                   href={link.href}
-                  className="text-lg font-medium text-text-primary py-2 border-b border-border"
+                  className="text-body-lg font-medium text-text-primary py-2 border-b border-border"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {link.name}
                 </a>
               ))}
-              <Link to="/cities" className="text-lg font-medium text-text-primary py-2 border-b border-border" onClick={() => setIsMobileMenuOpen(false)}>
+              <Link to="/cities" className="text-body-lg font-medium text-text-primary py-2 border-b border-border" onClick={() => setIsMobileMenuOpen(false)}>
                 Cities We Serve
               </Link>
               <div className="flex flex-col gap-4 mt-4">

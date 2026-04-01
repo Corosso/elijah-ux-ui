@@ -8,7 +8,7 @@ export const navLinks: NavLink[] = [
 ];
 
 export const contactInfo: ContactInfo = {
-  phone: '+57 300 000 0000',
+  phone: '+1 (800) 555-0199',
   social: {
     instagram: '#',
     twitter: '#',

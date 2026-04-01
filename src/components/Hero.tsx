@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { BookingForm } from './BookingForm';
+import { BookingForm } from './booking';
 import { MapPreview } from './MapPreview';
 import type { RouteGeometry } from '../api/googleMaps';
 
@@ -34,11 +34,12 @@ export function Hero({ isDark }: HeroProps) {
   );
 
   return (
-    <section className="relative bg-bg-primary pt-16 sm:pt-20 pb-[5vw]">
+    <section className="relative bg-bg-primary pt-20 sm:pt-24 pb-[5vw]">
       {/* Desktop: contained map with form overlay */}
-      <div className="hidden lg:block max-w-6xl mx-auto px-6 xl:px-8">
-        <div className="relative rounded-xl overflow-hidden shadow-luxury dark:shadow-luxury-dark" style={{ height: '460px' }}>
-          <div className="absolute inset-0 z-0">
+      <div className="hidden lg:block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative" style={{ minHeight: 'clamp(360px, 45vh, 520px)' }}>
+          {/* Map — fixed height, clipped corners */}
+          <div className="rounded-xl overflow-hidden shadow-luxury dark:shadow-luxury-dark" style={{ height: 'clamp(360px, 45vh, 520px)' }}>
             <MapPreview
               isDark={isDark}
               route={route}
@@ -47,8 +48,8 @@ export function Hero({ isDark }: HeroProps) {
               topOffset={0}
             />
           </div>
-          {/* Form card overlaying top-right */}
-          <div className="absolute top-4 right-4 bottom-4 z-10 w-full max-w-md">
+          {/* Form — floats over map, can extend below it */}
+          <div className="absolute top-4 right-4 z-10 w-full max-w-md">
             <BookingForm onRoutePreview={handleRoutePreview} />
           </div>
         </div>
@@ -70,9 +71,7 @@ export function Hero({ isDark }: HeroProps) {
           style={{ height: `${mobileFormHeight + 72}px` }}
         >
           <div className="w-full h-full" style={{
-            background: isDark
-              ? 'linear-gradient(to bottom, #0A0A0A 80%, transparent 100%)'
-              : 'linear-gradient(to bottom, #FFFFFF 80%, transparent 100%)'
+            background: 'linear-gradient(to bottom, var(--bg-primary) 80%, transparent 100%)'
           }} />
         </div>
         <div className="relative z-[2] px-3 sm:px-6 w-full">
@@ -81,7 +80,7 @@ export function Hero({ isDark }: HeroProps) {
               <BookingForm onRoutePreview={handleRoutePreview} />
             </div>
           </div>
-          <div className="h-[220px] sm:h-[260px]" />
+          <div className="h-[30vh] sm:h-[35vh]" />
         </div>
       </div>
     </section>

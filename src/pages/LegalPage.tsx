@@ -34,14 +34,14 @@ export function LegalPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-10">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-sm text-gold hover:text-gold-hover mb-8 transition-colors"
+            className="inline-flex items-center gap-2 text-caption text-gold hover:text-gold-hover mb-8 transition-colors"
           >
             <ArrowLeftIcon className="w-4 h-4" />
             Back to Home
           </Link>
 
-          <h1 className="font-serif text-3xl sm:text-4xl text-text-primary mb-3">Legal Information</h1>
-          <p className="text-text-secondary text-sm leading-relaxed max-w-2xl">
+          <h1 className="font-serif text-heading-md-fluid text-text-primary mb-3">Legal Information</h1>
+          <p className="text-text-secondary text-caption max-w-2xl">
             Everything you need to know about how we handle your data, our service terms, and cookie usage.
             Last updated: March 2026.
           </p>
@@ -58,7 +58,7 @@ export function LegalPage() {
                     setActiveTab(tab.key);
                     window.history.replaceState(null, '', `/legal#${tab.key}`);
                   }}
-                  className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                  className={`flex items-center gap-2 px-4 py-3 text-caption font-medium whitespace-nowrap border-b-2 transition-colors ${
                     isActive
                       ? 'border-gold text-gold'
                       : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
@@ -94,8 +94,8 @@ export function LegalPage() {
                   })()}
                 </div>
                 <div>
-                  <h2 className="font-serif text-2xl text-text-primary">{legalTitles[activeTab]}</h2>
-                  <p className="text-xs text-text-secondary uppercase tracking-wider">Effective March 2026</p>
+                  <h2 className="font-serif text-heading-xs text-text-primary">{legalTitles[activeTab]}</h2>
+                  <p className="text-eyebrow-sm text-text-secondary">Effective March 2026</p>
                 </div>
               </div>
               <div className="w-full h-px bg-border mt-6" />
@@ -105,8 +105,8 @@ export function LegalPage() {
             {sections.map((section, i) => (
               <div key={i} className="group">
                 <div className="py-6">
-                  <h3 className="text-base font-semibold text-gold mb-3 font-serif">{section.heading}</h3>
-                  <p className="text-sm text-text-secondary leading-[1.8] max-w-3xl">{section.body}</p>
+                  <h3 className="text-body font-semibold text-gold mb-3 font-serif">{section.heading}</h3>
+                  <p className="text-caption text-text-secondary leading-[1.8] max-w-3xl">{section.body}</p>
                 </div>
                 {i < sections.length - 1 && (
                   <div className="w-full h-px bg-border/50" />
@@ -127,7 +127,7 @@ export function LegalPage() {
                   window.history.replaceState(null, '', `/legal#${tab.key}`);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="text-sm text-text-secondary hover:text-gold transition-colors flex items-center gap-2"
+                className="text-caption text-text-secondary hover:text-gold transition-colors flex items-center gap-2"
               >
                 <tab.icon className="w-4 h-4" />
                 Read {tab.label}
