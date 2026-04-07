@@ -27,7 +27,10 @@ export function OverlayPortal({ step, onClose, children }: OverlayPortalProps) {
       <div className="sticky top-0 z-10 bg-bg-primary/95 backdrop-blur-md border-b border-border">
         <div className="max-w-6xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <span className="text-logo text-gold">ELIJAH</span>
+            <div className="flex items-center gap-2">
+              <img src="/logo.png" alt="Elijah Logo" className="h-8 sm:h-10 w-auto object-contain" />
+              <span className="text-logo text-gold text-glow-gold">ELIJAH</span>
+            </div>
             <button onClick={onClose} className="p-1.5 sm:p-2 rounded-full hover:bg-bg-elevated transition-colors text-text-secondary" aria-label="Close">
               <XIcon className="w-5 h-5" />
             </button>
