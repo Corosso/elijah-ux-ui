@@ -22,8 +22,14 @@ export function PriceSidebar({ breakdown, buttonLabel, onAction }: PriceSidebarP
             <span className="text-caption font-medium text-text-primary">${breakdown.returnLegCost.toFixed(2)} USD</span>
           </div>
         )}
+        {breakdown.nightFee > 0 && (
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-caption text-text-secondary">Night Time Fee</span>
+            <span className="text-caption font-medium text-text-primary">${breakdown.nightFee.toFixed(2)} USD</span>
+          </div>
+        )}
         <div className="border-t border-border pt-3 mt-3 flex items-center justify-between">
-          <span className="text-caption font-bold text-text-primary">Total</span>
+          <span className="text-caption font-bold text-gold">Total</span>
           <div className="flex items-baseline gap-0.5">
             <span className="text-body-lg font-bold text-text-primary">${totalParts[0]}</span>
             <span className="text-caption font-bold text-text-primary">.{totalParts[1]}</span>
@@ -38,11 +44,9 @@ export function PriceSidebar({ breakdown, buttonLabel, onAction }: PriceSidebarP
             {buttonLabel}
           </button>
         )}
-        <p className="text-micro text-text-secondary/60 text-center mt-3">Secure payments</p>
-        <p className="text-micro text-text-secondary/40 text-center">Powered by <strong>Stripe</strong></p>
-      </div>
 
-      <div className="border border-border rounded-lg p-5 bg-bg-primary dark:bg-bg-elevated">
+        <p className="text-caption text-text-secondary/60 text-center mt-4">Secure payments</p>
+        <p className="text-micro text-text-secondary/40 text-center mb-3">Powered by <strong>Stripe</strong></p>
         <PaymentBrands />
       </div>
     </div>

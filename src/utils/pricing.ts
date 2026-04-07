@@ -1,6 +1,7 @@
 export interface PricingBreakdown {
   subtotal: number;
   returnLegCost: number;
+  nightFee: number;
   total: number;
 }
 
@@ -13,6 +14,7 @@ interface PointToPointInput {
   returnTrip: boolean;
   pickupLat?: number;
   pickupLng?: number;
+  pickupHour?: number;
 }
 
 interface HourlyInput {
@@ -21,11 +23,19 @@ interface HourlyInput {
   vehicleId: number;
   pickupLat?: number;
   pickupLng?: number;
+  pickupHour?: number;
 }
 
 export type PricingInput = PointToPointInput | HourlyInput;
 
 const KM_TO_MILES = 0.621371;
+
+/** Flat $30 fee for pickups between 10 PM and 6 AM (Ridelux-derived) */
+const NIGHT_FEE = 30;
+function isNightHour(hour?: number): boolean {
+  if (hour == null) return false;
+  return hour >= 22 || hour < 6;
+}
 
 /* ── Point-to-point model (v4 — exact formula from Ridelux source) ───
  *  price = base + perMile × miles
@@ -227,6 +237,8 @@ function haversineMi(lat1: number, lng1: number, lat2: number, lng2: number): nu
 // ── Public API ───────────────────────────────────────────────────
 
 export function calculatePrice(input: PricingInput): PricingBreakdown {
+  const nightFee = isNightHour(input.pickupHour) ? NIGHT_FEE : 0;
+
   if (input.mode === 'hourly') {
     const tier = getHourlyTier(input.pickupLat, input.pickupLng);
     const rate = tier[input.vehicleId] ?? tier[2];
@@ -235,7 +247,8 @@ export function calculatePrice(input: PricingInput): PricingBreakdown {
     return {
       subtotal: Math.round(subtotal * 100) / 100,
       returnLegCost: 0,
-      total: Math.round(subtotal * 100) / 100,
+      nightFee,
+      total: Math.round((subtotal + nightFee) * 100) / 100,
     };
   }
 
@@ -248,6 +261,7 @@ export function calculatePrice(input: PricingInput): PricingBreakdown {
   return {
     subtotal: Math.round(subtotal * 100) / 100,
     returnLegCost: Math.round(returnLegCost * 100) / 100,
-    total: Math.round((subtotal + returnLegCost) * 100) / 100,
+    nightFee,
+    total: Math.round((subtotal + returnLegCost + nightFee) * 100) / 100,
   };
 }

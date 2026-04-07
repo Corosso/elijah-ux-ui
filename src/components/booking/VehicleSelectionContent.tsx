@@ -31,13 +31,15 @@ export function VehicleSelectionContent({ origin, destination, date, time, servi
     [serviceMode, origin.lat, origin.lng],
   );
 
+  const pickupHour = time ? parseInt(time.split(':')[0], 10) : undefined;
+
   const breakdowns = useMemo(
     () => Object.fromEntries(vehicles.map(v => [v.id,
       serviceMode === 'hourly'
-        ? calculatePrice({ mode: 'hourly', hours, vehicleId: v.id, pickupLat: origin.lat, pickupLng: origin.lng })
-        : calculatePrice({ mode: 'point-to-point', distanceKm: (routeResult?.distance ?? 0) / 1000, vehicleId: v.id, returnTrip, pickupLat: origin.lat, pickupLng: origin.lng }),
+        ? calculatePrice({ mode: 'hourly', hours, vehicleId: v.id, pickupLat: origin.lat, pickupLng: origin.lng, pickupHour })
+        : calculatePrice({ mode: 'point-to-point', distanceKm: (routeResult?.distance ?? 0) / 1000, vehicleId: v.id, returnTrip, pickupLat: origin.lat, pickupLng: origin.lng, pickupHour }),
     ])),
-    [serviceMode, hours, routeResult?.distance, returnTrip, origin.lat, origin.lng],
+    [serviceMode, hours, routeResult?.distance, returnTrip, origin.lat, origin.lng, pickupHour],
   );
 
   // Filter by market availability (point-to-point) and sort by price
@@ -76,7 +78,8 @@ export function VehicleSelectionContent({ origin, destination, date, time, servi
             </div>
           </div>
           <div className="border border-border rounded-lg p-5 bg-bg-primary dark:bg-bg-elevated">
-            <h4 className="text-caption font-bold text-text-primary mb-3">Secure payments</h4>
+            <p className="text-caption text-text-secondary/60 text-center">Secure payments</p>
+            <p className="text-micro text-text-secondary/40 text-center mb-3">Powered by <strong>Stripe</strong></p>
             <PaymentBrands />
           </div>
         </div>
